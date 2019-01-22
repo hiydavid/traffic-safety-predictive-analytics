@@ -10,8 +10,6 @@ library(lubridate)
 library(scales)
 library(tidycensus)
 
-
-
 ################################################## Read and transform master data
 
 # Set directory
@@ -36,11 +34,9 @@ collisions <- data %>%
 write.csv(collisions, "data_collisions.csv", row.names = FALSE)
 write.csv(census, "data_census.csv", row.names = FALSE)
 
-
-
 ################################################## Merge, transform, and clean features
 
-# Bring in the tract squarefootage data
+# Bring in the tract square mile data
 area <- read_csv("data_2010_area.csv")
 area <- area[,-(2:5)]
 colnames(area) <- c("GEOID", "sqmi_total", "sqmi_water", "sqmi_land")
@@ -71,8 +67,6 @@ view_corr <- function(df) {
 # Review feature_0
 view_corr(features_0)
 
-
-
 ################################################## Merge, transform, and clean features
 
 ############################## Iteration 1
@@ -80,7 +74,8 @@ features_1 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
             race_white,
-            race_minority = (sum(race_black, race_asian, race_hispanic, race_native, race_hawaiian, race_other, race_twoplus)),
+            race_minority = (sum(race_black, race_asian, race_hispanic, race_native, 
+                                 race_hawaiian, race_other, race_twoplus)),
             female,
             age_genz = (sum(age_under5, age_5t17)),
             age_millenial = (sum(age_18t24, age_25t34)),
@@ -110,15 +105,17 @@ df_features_1 <- left_join(features_1, collisions, by = "GEOID")
 View(df_features_1)
 write.csv(df_features_1, "df_features_1.csv", row.names = FALSE)
 
-# Note: This iteration was mostly combining and removing variables without any normalization 
-#       or transformation, with the exception of normalizing population by land square miles.
+# Note: This iteration was mostly combining and removing variables without any 
+#       normalization or transformation, with the exception of normalizing 
+#       population by land square miles.
 
 
 ############################## Iteration 2
 features_2 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
-            perc_minority = (sum(race_black, race_asian, race_hispanic, race_native, race_hawaiian, race_other, race_twoplus) / pop),
+            perc_minority = (sum(race_black, race_asian, race_hispanic, race_native, 
+                                 race_hawaiian, race_other, race_twoplus) / pop),
             perc_female = (female / pop),
             perc_genz = (sum(age_under5, age_5t17) / pop),
             perc_millenial = (sum(age_18t24, age_25t34) / pop),
@@ -148,8 +145,9 @@ df_features_2 <- left_join(features_2, collisions, by = "GEOID")
 View(df_features_2)
 write.csv(df_features_2, "df_features_2.csv", row.names = FALSE)
 
-# Note: This iteration picks up from iteration 1, with the addition of normalization by population 
-# where applicable. No transformations were done otherwise.
+# Note: This iteration picks up from iteration 1, with the addition of 
+#       normalization by population where applicable. No transformations 
+#       were done otherwise.
 
 
 ############################## Iteration 3
