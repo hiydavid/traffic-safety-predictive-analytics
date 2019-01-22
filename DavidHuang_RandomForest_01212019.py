@@ -1,5 +1,7 @@
-### RANDOM FOREST MODELING
-### VERSION: df_features_1
+### Owner:      David Huang
+### Model:      Random Forest
+### Version:    df_features_1
+### Date:       2019-01-21
 
 ############################################################ LOAD & PREP
 
