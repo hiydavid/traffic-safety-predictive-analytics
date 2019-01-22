@@ -30,7 +30,7 @@ from sklearn.metrics import mean_squared_error as MSE
 # NY = data[data['City'] == "NYC"].dropna(axis = 'rows')
 # DC = data[data['City'] == "DC"].dropna(axis = 'rows')
     
-# Create data frame cleaning funtion
+# Create model workflow that prep, train, and test random forest model
 def rando(df, train_city, y_var, n_trees, depth):
     
     # Split data into training and test sets
