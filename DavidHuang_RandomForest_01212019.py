@@ -70,7 +70,7 @@ def rando(df, train_city, y_var, n_trees, depth):
     plt.title('Features Importances')
     plt.show()
 
-############################################################ NYC: TOTAL INJURIES
+############################################################ RUN MODELS & REVIEW OUTPUTS
 
 # Run random forest model on NYC, Total Injuries
 rando(df = data, 
