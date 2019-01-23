@@ -33,7 +33,7 @@ from sklearn.metrics import mean_squared_error as MSE
 # DC = data[data['City'] == "DC"].dropna(axis = 'rows')
 
 # Create model workflow that prep, train, and test random forest model
-def rando(df, train_city, y_var, n_trees, depth):
+def rando(df, train_city, y_var, n_trees, depth, max_feat):
     
     # Split data into training and test sets
     train = data[data['City'] == train_city].dropna(axis = 'rows')
@@ -49,6 +49,7 @@ def rando(df, train_city, y_var, n_trees, depth):
     rf = RandomForestRegressor(
         n_estimators = n_trees, 
         max_depth = depth,
+        max_features = max_feat,
         random_state = SEED)
     rf.fit(X_train, y_train)
     
@@ -81,7 +82,8 @@ rando(df = data,
       train_city = "NYC", 
       y_var = "TotalInjuries", 
       n_trees = 500, 
-      depth = 3
+      depth = 5,
+      max_feat = 0.5
       )
 
 # Run random forest model on NYC, Total Deaths
@@ -91,7 +93,8 @@ rando(df = data,
       train_city = "NYC", 
       y_var = "TotalDeaths", 
       n_trees = 500, 
-      depth = 3
+      depth = 5,
+      max_feat = 0.5
       )
 
 # Run random forest model on LA, Total Injuries
@@ -102,7 +105,8 @@ rando(df = data,
       train_city = "LA", 
       y_var = "TotalInjuries", 
       n_trees = 500, 
-      depth = 3
+      depth = 5,
+      max_feat = 0.5
       )
 
 # Run random forest model on LA, Total Deaths
@@ -112,5 +116,6 @@ rando(df = data,
       train_city = "LA", 
       y_var = "TotalDeaths", 
       n_trees = 500, 
-      depth = 3
+      depth = 5,
+      max_feat = 0.5
       )
