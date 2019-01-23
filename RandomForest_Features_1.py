@@ -31,7 +31,7 @@ from sklearn.metrics import mean_squared_error as MSE
 # LA = data[data['City'] == "LA"].dropna(axis = 'rows')
 # NY = data[data['City'] == "NYC"].dropna(axis = 'rows')
 # DC = data[data['City'] == "DC"].dropna(axis = 'rows')
-    
+
 # Create model workflow that prep, train, and test random forest model
 def rando(df, train_city, y_var, n_trees, depth):
     
@@ -75,33 +75,42 @@ def rando(df, train_city, y_var, n_trees, depth):
 ############################################################ RUN MODELS & REVIEW OUTPUTS
 
 # Run random forest model on NYC, Total Injuries
+# Feature 'pop_dens' > 'race_minority' > 'median_earnings' > 'age_millenials' > 'edu_bs'
+# RMSE 122.61 vs Mean 161.26 vs Stdev 124.35
 rando(df = data, 
       train_city = "NYC", 
       y_var = "TotalInjuries", 
-      n_trees = 100, 
+      n_trees = 500, 
       depth = 3
       )
 
 # Run random forest model on NYC, Total Deaths
+# Feature 'pop_dens' > 'race_minority' > 'median_earnings' > 'age_retiree' > 'race_white'
+# RMSE 1.06 vs Mean 0.58 vs Stdev 0.89
 rando(df = data, 
       train_city = "NYC", 
       y_var = "TotalDeaths", 
-      n_trees = 100, 
+      n_trees = 500, 
       depth = 3
       )
 
 # Run random forest model on LA, Total Injuries
+# Unlike the NY model, here RMSE actually goes up the more pruning
+# Feature 'trav_walk' > 'trav_trans' > 'female' > 'median_earnings > 'pop_dens'
+# RMSE 149.91 vs Mean 161.26 vs Stdev 124.35
 rando(df = data, 
       train_city = "LA", 
       y_var = "TotalInjuries", 
-      n_trees = 100, 
+      n_trees = 500, 
       depth = 3
       )
 
 # Run random forest model on LA, Total Deaths
+# Features 'edu_lowedu' > 'edu_hsged' > 'race_white' > 'female' > 'pop_dens'
+# RMSE 0.90
 rando(df = data, 
       train_city = "LA", 
       y_var = "TotalDeaths", 
-      n_trees = 100, 
+      n_trees = 500, 
       depth = 3
       )
