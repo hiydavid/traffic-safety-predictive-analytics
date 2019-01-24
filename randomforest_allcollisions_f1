@@ -1,6 +1,7 @@
 ### Owner:      David Huang
 ### Model:      Random Forest
 ### Version:    df_features_1
+### Target:     Total collisions
 ### Date:       2019-01-21
 
 ############################################################ LOAD & PREP
