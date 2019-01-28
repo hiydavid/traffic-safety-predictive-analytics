@@ -54,5 +54,7 @@ for filename in file_df['File_Name']:
         # append it to the PL list
         GEOID = pd.merge(GEOID, df1, how='left', on='GEOID')
 
-df2 = pd.merge(GEOID, df1, how='left', on='GEOID')
-df2.head()
+# change working directory
+os.chdir("C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone")
+# export data to csv
+GEOID.to_csv('new_vars.csv')
