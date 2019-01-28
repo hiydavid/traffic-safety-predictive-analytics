@@ -115,7 +115,6 @@ rando(df = f2,
       )
 
 # Run random forest model on NYC, Total Deaths, Feature Set 1
-
 rando(df = f2, 
       city = "NYC", 
       y_var = "TotalDeaths", 
@@ -154,7 +153,6 @@ rando(df = f2,
       )
 
 # Run random forest model on LA, Total Deaths, Feature Set 1
-
 rando(df = f2, 
       city = "LA", 
       y_var = "TotalDeaths", 
@@ -193,7 +191,6 @@ rando(df = f2,
       )
 
 # Run random forest model on NYC, Pedestrian Deaths, Feature Set 2
-
 rando(df = f2, 
       city = "NYC", 
       y_var = "PedeDeaths", 
@@ -232,7 +229,6 @@ rando(df = f2,
       )
 
 # Run random forest model on LA, Pedestrian Deaths, Feature Set 2
-
 rando(df = f2, 
       city = "LA", 
       y_var = "PedeDeaths", 
