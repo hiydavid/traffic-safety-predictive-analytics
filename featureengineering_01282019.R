@@ -2,8 +2,9 @@
 # Capstone Modeling Preparation & Feature Engineering
 
 ##################################################  Change Log
-# 2019-01-21  Created file
+# 2019-01-21  Created file with feature 1 and 2
 # 2019-01-23  Updated to include pedestrian data
+# 2019-01-28  Updated with feature 3
 
 
 
@@ -20,7 +21,7 @@ library(tidycensus)
 
 ################################################## Read and transform master data
 
-# Set directory (change to your own directory)
+# Set directory
 setwd("D:/_dhuang/Work/NYU Stern MSBA Work/Capstone/Data/CapstoneModeling")
 
 # Upload old master data
@@ -88,7 +89,8 @@ features_1 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
             race_white,
-            race_minority = (sum(race_black, race_asian, race_hispanic, race_native, race_hawaiian, race_other, race_twoplus)),
+            race_minority = (sum(race_black, race_asian, race_hispanic, race_native, 
+                                 race_hawaiian, race_other, race_twoplus)),
             female,
             age_genz = (sum(age_under5, age_5t17)),
             age_millenial = (sum(age_18t24, age_25t34)),
@@ -126,7 +128,8 @@ write.csv(df_features_1, "df_features_1.csv", row.names = FALSE)
 features_2 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
-            perc_minority = (sum(race_black, race_asian, race_hispanic, race_native, race_hawaiian, race_other, race_twoplus) / pop),
+            perc_minority = (sum(race_black, race_asian, race_hispanic, race_native, 
+                                 race_hawaiian, race_other, race_twoplus) / pop),
             perc_female = (female / pop),
             perc_genz = (sum(age_under5, age_5t17) / pop),
             perc_millenial = (sum(age_18t24, age_25t34) / pop),
@@ -161,4 +164,44 @@ write.csv(df_features_2, "df_features_2.csv", row.names = FALSE)
 #       were done otherwise.
 
 ############################## Iteration 3
-# TO BE CONTINUED...
+features_3 <- features_0 %>%
+  group_by(GEOID) %>%
+  transmute(pop_dens = (pop / (sqmi_land)),
+            minority_dens = (sum(race_black, race_asian, race_hispanic, race_native, 
+                                 race_hawaiian, race_other, race_twoplus) / sqmi_land),
+            female_dens = (female / sqmi_land),
+            genz_dens = (sum(age_under5, age_5t17) / sqmi_land),
+            millenial_dens = (sum(age_18t24, age_25t34) / sqmi_land),
+            genx_dens = (sum(age_35t44, age_45t54) / sqmi_land),
+            boomer_dens = (sum(age_55t59, age_60t61, age_62t64, age_65t74) / sqmi_land),
+            retiree_dens = (age_75plus / sqmi_land), 
+            divsep_dens = (sum(divorced, separated) / sqmi_land), 
+            widowed_dens = (widowed / sqmi_land),
+            median_age, 
+            foreign_dens = (not_us_citizen / sqmi_land), 
+            median_earnings, 
+            cars_dens = (trav_cars / sqmi_land), 
+            trans_dens = (sum(trav_pub, trav_taxi) / sqmi_land),
+            mbike_dens = (trav_motorcycle / sqmi_land),
+            bike_dens = (trav_bike / sqmi_land), 
+            walk_dens = (trav_walk / sqmi_land), 
+            wfm_dens = (trav_home / sqmi_land),
+            lowedu_dens = (sum(edu_none, edu_some_hs) / sqmi_land),
+            hsged_dens = (sum(edu_hs, edu_ged, edu_some_bs) / sqmi_land),
+            bs_dens = (edu_bs / sqmi_land),
+            grad_dens = (sum(edu_ms, edu_phd) / sqmi_land),
+            unemp_dens = (unemp / sqmi_land), 
+            pov_dens = (below_pov / sqmi_land)
+  )
+view_corr(features_3)
+df_features_3 <- left_join(features_3, collisions, by = "GEOID")
+View(df_features_3)
+write.csv(df_features_3, "df_features_3.csv", row.names = FALSE)
+
+# Note: This iteration differs from iteration 2 in that the variables are
+#       normalized by land square miles instead of population. No variables
+#       were transformed.
+
+############################## Iteration 4
+
+# TO BE CONTINUED 
