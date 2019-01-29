@@ -99,7 +99,7 @@ rando(df = f1,
       max_feat = 0.5
       )
 
-# Run random forest model on NYC, Total Injuries, Feature Set 1
+# Run random forest model on NYC, Total Injuries, Feature Set 2
 rando(df = f2,
       city = "NYC", 
       y_var = "TotalInjuries", 
@@ -108,7 +108,7 @@ rando(df = f2,
       max_feat = 0.5
       )
 
-# Run random forest model on NYC, Total Injuries, Feature Set 1
+# Run random forest model on NYC, Total Injuries, Feature Set 3
 rando(df = f3,
       city = "NYC", 
       y_var = "TotalInjuries", 
@@ -128,7 +128,7 @@ rando(df = f1,
       max_feat = 0.5
       )
 
-# Run random forest model on LA, Total Deaths, Feature Set 1
+# Run random forest model on LA, Total Injuries, Feature Set 2
 rando(df = f2, 
       city = "LA", 
       y_var = "TotalInjuries", 
@@ -137,7 +137,7 @@ rando(df = f2,
       max_feat = 0.5
       )
 
-# Run random forest model on LA, Total Injuries, Feature Set 1
+# Run random forest model on LA, Total Injuries, Feature Set 3
 rando(df = f3,
       city = "LA", 
       y_var = "TotalInjuries", 
@@ -148,7 +148,7 @@ rando(df = f3,
 
 ############################################################ NYC, PEDESTRIAN INJURIES
 
-# Run random forest model on NYC, Pedestrian Injuries, Feature Set 2
+# Run random forest model on NYC, Pedestrian Injuries, Feature Set 1
 rando(df = f1, 
       city = "NYC", 
       y_var = "PedeInjuries", 
@@ -157,7 +157,7 @@ rando(df = f1,
       max_feat = 0.5
       )
 
-# Run random forest model on NYC, Pedestrian Deaths, Feature Set 2
+# Run random forest model on NYC, Pedestrian Injuries, Feature Set 2
 rando(df = f2, 
       city = "NYC", 
       y_var = "PedeInjuries", 
@@ -166,7 +166,7 @@ rando(df = f2,
       max_feat = 0.5
       )
 
-# Run random forest model on NYC, Pedestrian Deaths, Feature Set 2
+# Run random forest model on NYC, Pedestrian Injuries, Feature Set 3
 rando(df = f3, 
       city = "NYC", 
       y_var = "PedeInjuries", 
@@ -177,7 +177,7 @@ rando(df = f3,
 
 ############################################################ LA, PEDESTRIAN INJURIES
 
-# Run random forest model on LA, Pedestrian Injuries, Feature Set 2
+# Run random forest model on LA, Pedestrian Injuries, Feature Set 1
 rando(df = f1, 
       city = "LA", 
       y_var = "PedeInjuries", 
@@ -186,7 +186,7 @@ rando(df = f1,
       max_feat = 0.5
       )
 
-# Run random forest model on LA, Pedestrian Deaths, Feature Set 2
+# Run random forest model on LA, Pedestrian Injuries, Feature Set 2
 rando(df = f2, 
       city = "LA", 
       y_var = "PedeInjuries", 
@@ -195,7 +195,7 @@ rando(df = f2,
       max_feat = 0.5
       )
 
-# Run random forest model on LA, Pedestrian Injuries, Feature Set 2
+# Run random forest model on LA, Pedestrian Injuries, Feature Set 3
 rando(df = f3,
       city = "LA", 
       y_var = "PedeInjuries", 
