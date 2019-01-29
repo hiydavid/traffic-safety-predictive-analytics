@@ -1,10 +1,12 @@
 ### Owner:      David Huang
 ### Model:      Random Forest
-### Date:       2019-01-23
+### Date:       2019-01-28
 
 ############################################################ CHANGE LOG
 # 2019-01-21    Created file
 # 2019-01-23    Updated to run different features in one workflow
+# 2019-01-28    Added with feature_3 data
+#               Excluded target variable related to deaths
 
 ############################################################ LOAD & PREP
 
@@ -20,7 +22,8 @@ pd.set_option('display.float_format', '{:,.5f}'.format)
 
 # Load datasets
 f1 = pd.read_csv('df_features_1.csv')       # Count data
-f2 = pd.read_csv('df_features_2.csv')       # Normalized data
+f2 = pd.read_csv('df_features_2.csv')       # Normalized by population
+f3 = pd.read_csv('df_features_3.csv')       # Normalized by land
 
 # Setting random state
 SEED = 1234
@@ -62,7 +65,7 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     rmse_score = np.sqrt(MSE(y_test, y_pred))
     
     # Prin restuls
-    print("***** MODEL OUTPUT *****")
+    print("MODEL OUTPUT ****************************************")
     print("")
     print("Target City: {}".format(geo['City'].unique()))
     print("Target Variable: {}".format(y_var))
@@ -82,24 +85,15 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     
     # Spaceholder
     print("")
-    print("***** END OF OUTPUT *****")
+    print("END OF OUTPUT ***************************************")
     print("")
 
-############################################################ NYC, OVERALL COLLISION RISK
+############################################################ NYC, OVERALL INJURIES
 
 # Run random forest model on NYC, Total Injuries, Feature Set 1
 rando(df = f1, 
       city = "NYC", 
       y_var = "TotalInjuries", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-# Run random forest model on NYC, Total Deaths, Feature Set 1
-rando(df = f1, 
-      city = "NYC", 
-      y_var = "TotalDeaths", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
@@ -114,16 +108,16 @@ rando(df = f2,
       max_feat = 0.5
       )
 
-# Run random forest model on NYC, Total Deaths, Feature Set 1
-rando(df = f2, 
+# Run random forest model on NYC, Total Injuries, Feature Set 1
+rando(df = f3,
       city = "NYC", 
-      y_var = "TotalDeaths", 
+      y_var = "TotalInjuries", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
       )
 
-############################################################ LA, OVERALL COLLISION RISK
+############################################################ LA, OVERALL INJURIES
 
 # Run random forest model on LA, Total Injuries, Feature Set 1
 rando(df = f1, 
@@ -135,16 +129,7 @@ rando(df = f1,
       )
 
 # Run random forest model on LA, Total Deaths, Feature Set 1
-rando(df = f1, 
-      city = "LA", 
-      y_var = "TotalDeaths", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-# Run random forest model on LA, Total Injuries, Feature Set 1
-rando(df = f2,
+rando(df = f2, 
       city = "LA", 
       y_var = "TotalInjuries", 
       n_trees = 500, 
@@ -152,16 +137,16 @@ rando(df = f2,
       max_feat = 0.5
       )
 
-# Run random forest model on LA, Total Deaths, Feature Set 1
-rando(df = f2, 
+# Run random forest model on LA, Total Injuries, Feature Set 1
+rando(df = f3,
       city = "LA", 
-      y_var = "TotalDeaths", 
+      y_var = "TotalInjuries", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
       )
 
-############################################################ NYC, PEDESTRIAN RISK
+############################################################ NYC, PEDESTRIAN INJURIES
 
 # Run random forest model on NYC, Pedestrian Injuries, Feature Set 2
 rando(df = f1, 
@@ -173,16 +158,7 @@ rando(df = f1,
       )
 
 # Run random forest model on NYC, Pedestrian Deaths, Feature Set 2
-rando(df = f1, 
-      city = "NYC", 
-      y_var = "PedeDeaths", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-# Run random forest model on NYC, Pedestrian Injuries, Feature Set 2
-rando(df = f2,
+rando(df = f2, 
       city = "NYC", 
       y_var = "PedeInjuries", 
       n_trees = 500, 
@@ -191,36 +167,18 @@ rando(df = f2,
       )
 
 # Run random forest model on NYC, Pedestrian Deaths, Feature Set 2
-rando(df = f2, 
+rando(df = f3, 
       city = "NYC", 
-      y_var = "PedeDeaths", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-############################################################ LA, PEDESTRIAN RISK
-
-# Run random forest model on LA, Pedestrian Injuries, Feature Set 2
-rando(df = f1, 
-      city = "LA", 
       y_var = "PedeInjuries", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
       )
 
-# Run random forest model on LA, Pedestrian Deaths, Feature Set 2
-rando(df = f1, 
-      city = "LA", 
-      y_var = "PedeDeaths", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
+############################################################ LA, PEDESTRIAN INJURIES
 
 # Run random forest model on LA, Pedestrian Injuries, Feature Set 2
-rando(df = f2,
+rando(df = f1, 
       city = "LA", 
       y_var = "PedeInjuries", 
       n_trees = 500, 
@@ -231,10 +189,18 @@ rando(df = f2,
 # Run random forest model on LA, Pedestrian Deaths, Feature Set 2
 rando(df = f2, 
       city = "LA", 
-      y_var = "PedeDeaths", 
+      y_var = "PedeInjuries", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
       )
 
+# Run random forest model on LA, Pedestrian Injuries, Feature Set 2
+rando(df = f3,
+      city = "LA", 
+      y_var = "PedeInjuries", 
+      n_trees = 500, 
+      depth = 5,
+      max_feat = 0.5
+      )
 
