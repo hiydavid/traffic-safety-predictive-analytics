@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jan 27 15:43:56 2019
+
+@author: n0284436
+"""
 # load the required packages
 import pandas as pd
 import glob 
@@ -65,7 +71,7 @@ for filename in file_nyc['File_Name']:
         df1.loc[:,'GEOID'] *= 100
         # convert x1 geoid to character
         df1['GEOID'] = df1['GEOID'].astype(str)
-        # append it to the PL list
+        # append it to the NYC list
         GEOID_NYC = pd.merge(GEOID_NYC, df1, how='left', on='GEOID')
 
 # for each file in the file dataframe
@@ -80,7 +86,7 @@ for filename in file_la['File_Name']:
         df2.loc[:,'GEOID'] *= 100
         # convert x1 geoid to character
         df2['GEOID'] = df2['GEOID'].astype(str)
-        # append it to the PL list
+        # append it to the LA list
         GEOID_LA = pd.merge(GEOID_LA, df2, how='left', on='GEOID')
 
 # look for all of the csv files within that folder
@@ -123,11 +129,11 @@ for filename in file_nyc['File_Name']:
         df3['GEOID'] = df3['GEOID'].astype(str)
         # add doke .0
         df3['GEOID']=df3['GEOID']+'.0'
-        # append it to the PL list
+        # append it to the NYC list
         GEOID_NYC = pd.merge(GEOID_NYC, df3, how='left', on='GEOID')
 
 # for each file in the file dataframe
-for filename in file_nyc['File_Name']: 
+for filename in file_la['File_Name']: 
     # if the file is not null then
     if pd.notnull(filename):
         # Load spreadsheet
@@ -136,10 +142,15 @@ for filename in file_nyc['File_Name']:
         df4['GEOID'] = df4['GEOID'].astype(str)
         # add doke .0
         df4['GEOID']=df4['GEOID']+'.0'
-        # append it to the PL list
+        # append it to the LA list
         GEOID_LA = pd.merge(GEOID_LA, df4, how='left', on='GEOID')
+
+# Append the two cities together
+NewVars = GEOID_NYC.append(GEOID_LA, ignore_index=True)
+# Re order the columns
+NewVarsExport = NewVars.iloc[:, [9,6,0,1,2,3,4,5,7,8,10,11,12,13,14,15,16]]
 
 # change working directory
 os.chdir("C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone")
 # export data to csv
-GEOID.to_csv('new_vars.csv')
+NewVarsExport.to_csv('new_vars.csv')
