@@ -10,7 +10,8 @@ import glob
 import os
 
 # Load in the master data file and get the de-duped census tracts and store them in the base dataframe
-master = pd.read_csv("C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone/Master.1.20.2019.csv")
+filepath = "C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone/Master.1.20.2019.csv"
+master = pd.read_csv(filepath)
 
 # create an empty list 
 # change this to character
@@ -24,7 +25,7 @@ LA = GEOID['City'] == 'LA'
 GEOID_LA = GEOID[LA]
 GEOID_LA = GEOID_LA.loc[:,['GEOID','City']]
 
-# Change directory 
+# create path to folder where all the files to import reside
 path = r"C:\Users\n0284436\Documents\NYU_Stern_MSBA\Capstone\New_Vars"
 
 # look for all of the xlsx files within that folder
@@ -58,7 +59,7 @@ file_la = file_df[file_df['City']=='LA']
 file_nyc = file_df[file_df['City']=='NYC']
 
 # change working directory
-os.chdir("C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone/New_Vars")
+os.chdir(path)
 # for each file in the file dataframe
 for filename in file_nyc['File_Name']: 
     # if the file is not null then
@@ -127,7 +128,7 @@ for filename in file_nyc['File_Name']:
         df3 = pd.read_csv(filename)
         # convert x1 geoid to character
         df3['GEOID'] = df3['GEOID'].astype(str)
-        # add doke .0
+        # add .0 to the end of the GEOID for join
         df3['GEOID']=df3['GEOID']+'.0'
         # append it to the NYC list
         GEOID_NYC = pd.merge(GEOID_NYC, df3, how='left', on='GEOID')
@@ -140,17 +141,24 @@ for filename in file_la['File_Name']:
         df4 = pd.read_csv(filename)
         # convert x1 geoid to character
         df4['GEOID'] = df4['GEOID'].astype(str)
-        # add doke .0
+        # add .0 to the end of the GEOID for join
         df4['GEOID']=df4['GEOID']+'.0'
         # append it to the LA list
         GEOID_LA = pd.merge(GEOID_LA, df4, how='left', on='GEOID')
 
 # Append the two cities together
 NewVars = GEOID_NYC.append(GEOID_LA, ignore_index=True)
+# store the column names in a list
+cols = NewVars.dtypes
+cols = pd.DataFrame(cols) 
+# get the index of each column
+cols.insert(0, 'Index', range(0, 0 + len(cols)))
 # Re order the columns
-NewVarsExport = NewVars.iloc[:, [9,6,0,1,2,3,4,5,7,8,10,11,12,13,14,15,16]]
+NewVarsExport = NewVars.iloc[:, [11,7,37,0,1,2,3,4,5,8,9,10,12,13,14,15,16,17,18,19,20,21,
+                                 22,23,24,25,26,27,28,29,30,31,33,34,35,39,40,31,42,43]]
 
 # change working directory
-os.chdir("C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone")
+path2 = "C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone"
+os.chdir(path2)
 # export data to csv
 NewVarsExport.to_csv('new_vars.csv')
