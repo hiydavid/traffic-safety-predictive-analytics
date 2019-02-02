@@ -5,10 +5,13 @@
 # 2019-01-21  Created file with feature 1 and 2
 # 2019-01-23  Updated to include pedestrian data
 # 2019-01-28  Updated with feature 3
+# 2019-02-02  Updatde with new_vars and casualties column
 
 
 
 ##################################################  Load libraries and data 
+
+# Load packages
 library(readr)
 library(tidyr)
 library(dplyr)
@@ -17,12 +20,12 @@ library(lubridate)
 library(scales)
 library(tidycensus)
 
-
-
-################################################## Read and transform master data
-
-# Set directory
+# Set directory (change to your own directory)
 setwd("D:/_dhuang/Work/NYU Stern MSBA Work/Capstone/Data/CapstoneModeling")
+
+
+
+################################################## Read and transform master data (for first time only)
 
 # Upload old master data
 data <- read_csv("Master.1.20.2019.csv")
@@ -36,6 +39,7 @@ census <- unique(census)
 collisions <- data %>%
   group_by(City, GEOID) %>%
   summarise(Collisions = n(),
+            Casualties = sum(TotalCasualties),
             PedeInjuries = sum(TotalPedestrianInjuries),
             PedeDeaths = sum(TotalPedestrianDeaths),
             TotalInjuries = sum(TotalInjuries), 
@@ -47,13 +51,24 @@ write.csv(census, "data_census.csv", row.names = FALSE)
 
 
 
-################################################## Merge, transform, and clean features
+################################################## Read in file if alreadt seperated
+
+# Read in collisions and census data
+collisions <- read_csv("data_collisions.csv")
+census <- read_csv("data_census.csv")
 
 # Bring in the tract squarefootage data
 area <- read_csv("data_2010_area.csv")
 area <- area[,-(2:5)]
 colnames(area) <- c("GEOID", "sqmi_total", "sqmi_water", "sqmi_land")
 area$GEOID <- as.character(area$GEOID)
+
+# Read in Ron's new variables
+new_vars <- read_csv("new_vars.csv", row.names = FALSE)
+new_vars <- new_vars[, -1]
+
+
+################################################## Prepare function to view correlations
 
 # Merge tract size to census data
 features_0 <- left_join(census, area, by = "GEOID")
@@ -205,3 +220,12 @@ write.csv(df_features_3, "df_features_3.csv", row.names = FALSE)
 ############################## Iteration 4
 
 # TO BE CONTINUED 
+
+
+
+
+
+# Review 
+hist(features_3['female_dens'])
+hist(log10(features_3['female_dens']))
+
