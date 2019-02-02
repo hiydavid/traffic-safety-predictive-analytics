@@ -7,6 +7,7 @@
 # 2019-01-23    Updated to run different features in one workflow
 # 2019-01-28    Added with feature_3 data
 #               Excluded target variable related to deaths
+# 2019-02-02    Added casualties target and removed other targets
 
 ############################################################ LOAD & PREP
 
@@ -40,9 +41,9 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     
     # Split data into training and test sets
     geo = df[df['City'] == city].dropna(axis = 'rows')
-    X = geo.drop(['GEOID', 'City', 'Collisions', 
-                   'PedeInjuries', 'PedeDeaths', 
-                   'TotalInjuries', 'TotalDeaths'], axis = 1)
+    X = geo.drop(['GEOID', 'City', 'Collisions', 'Casualties',
+                   'PedeInjuries', 'PedeDeaths', 'TotalInjuries', 
+                   'TotalDeaths'], axis = 1)
     y = geo[y_var]
     
     # Split data into
@@ -61,7 +62,8 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     y_pred = rf.predict(X_test)
     
     # Score calculation
-    fit_score = rf.score(X_train, y_train)
+    train_score = rf.score(X_train, y_train)
+    test_score = rf.score(X_test, y_test)
     rmse_score = np.sqrt(MSE(y_test, y_pred))
     
     # Prin restuls
@@ -69,7 +71,8 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     print("")
     print("Target City: {}".format(geo['City'].unique()))
     print("Target Variable: {}".format(y_var))
-    print("Model Fit: {:.2f}".format(fit_score))
+    print("Train Score: {:.2f}".format(train_score))
+    print("Test Score: {:.2f}".format(test_score))
     print("Model RMSE: {:.2f}".format(rmse_score))
     print("Target Mean: {:.2f}".format(np.mean(y)))
     print("Target Stdev: {:.2f}".format(np.std(y)))
@@ -88,41 +91,50 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     print("END OF OUTPUT ***************************************")
     print("")
 
-############################################################ NYC, OVERALL INJURIES
+############################################################ NYC, OVERALL CASUALTIES
 
 # Run random forest model on NYC, Total Injuries, Feature Set 1
+# Fit 0.57 / RMSE 80.84
+# Top 5: pop_dens, race_minority, trav_trans, age_millenial, trav_walk
+# Bottom 5: trav_motorcycle, trav_bike, edu_grad, age_genz, widowed
 rando(df = f1, 
       city = "NYC", 
-      y_var = "TotalInjuries", 
+      y_var = "Casualties", 
       n_trees = 500, 
       depth = 5,
-      max_feat = 0.5
+      max_feat = 0.50
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 2
+# Fit 0.51 / RMSE 79.91
+# Top 5: pop_dens, perc_minority, perc_walk, perc_bs, perc_hsged
+# Bottom 5: perc_mbike, perc_bike, perc_genx, perc_widowed, perc_retiree
 rando(df = f2,
       city = "NYC", 
-      y_var = "TotalInjuries", 
+      y_var = "Casualties", 
       n_trees = 500, 
       depth = 5,
-      max_feat = 0.5
+      max_feat = 0.50
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 3
+# Fit 0.52 / RMSE 82.75
+# Top 5: cars_dens, bs_dens, boomber_dens, median_earnings, retiree_dens
+# Bottom 5: mbike_dens, bike_dens, female_dens, trans_dens, millenial_dens
 rando(df = f3,
       city = "NYC", 
-      y_var = "TotalInjuries", 
+      y_var = "Casualties", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
       )
 
-############################################################ LA, OVERALL INJURIES
+############################################################ LA, OVERALL CASUALTIES
 
 # Run random forest model on LA, Total Injuries, Feature Set 1
 rando(df = f1, 
       city = "LA", 
-      y_var = "TotalInjuries", 
+      y_var = "Casualties", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
@@ -131,7 +143,7 @@ rando(df = f1,
 # Run random forest model on LA, Total Injuries, Feature Set 2
 rando(df = f2, 
       city = "LA", 
-      y_var = "TotalInjuries", 
+      y_var = "Casualties", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
@@ -140,67 +152,8 @@ rando(df = f2,
 # Run random forest model on LA, Total Injuries, Feature Set 3
 rando(df = f3,
       city = "LA", 
-      y_var = "TotalInjuries", 
+      y_var = "Casualties", 
       n_trees = 500, 
       depth = 5,
       max_feat = 0.5
       )
-
-############################################################ NYC, PEDESTRIAN INJURIES
-
-# Run random forest model on NYC, Pedestrian Injuries, Feature Set 1
-rando(df = f1, 
-      city = "NYC", 
-      y_var = "PedeInjuries", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-# Run random forest model on NYC, Pedestrian Injuries, Feature Set 2
-rando(df = f2, 
-      city = "NYC", 
-      y_var = "PedeInjuries", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-# Run random forest model on NYC, Pedestrian Injuries, Feature Set 3
-rando(df = f3, 
-      city = "NYC", 
-      y_var = "PedeInjuries", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-############################################################ LA, PEDESTRIAN INJURIES
-
-# Run random forest model on LA, Pedestrian Injuries, Feature Set 1
-rando(df = f1, 
-      city = "LA", 
-      y_var = "PedeInjuries", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-# Run random forest model on LA, Pedestrian Injuries, Feature Set 2
-rando(df = f2, 
-      city = "LA", 
-      y_var = "PedeInjuries", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-
-# Run random forest model on LA, Pedestrian Injuries, Feature Set 3
-rando(df = f3,
-      city = "LA", 
-      y_var = "PedeInjuries", 
-      n_trees = 500, 
-      depth = 5,
-      max_feat = 0.5
-      )
-

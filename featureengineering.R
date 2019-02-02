@@ -55,7 +55,9 @@ write.csv(census, "data_census.csv", row.names = FALSE)
 
 # Read in collisions and census data
 collisions <- read_csv("data_collisions.csv")
+collisions$GEOID <- as.character(collisions$GEOID)
 census <- read_csv("data_census.csv")
+census$GEOID <- as.character(census$GEOID)
 
 # Bring in the tract squarefootage data
 area <- read_csv("data_2010_area.csv")
@@ -64,7 +66,8 @@ colnames(area) <- c("GEOID", "sqmi_total", "sqmi_water", "sqmi_land")
 area$GEOID <- as.character(area$GEOID)
 
 # Read in Ron's new variables
-new_vars <- read_csv("new_vars.csv", row.names = FALSE)
+new_vars <- read_csv("new_vars.csv")
+new_vars$GEOID <- as.character(new_vars$GEOID)
 new_vars <- new_vars[, -1]
 
 
@@ -72,6 +75,7 @@ new_vars <- new_vars[, -1]
 
 # Merge tract size to census data
 features_0 <- left_join(census, area, by = "GEOID")
+View(features_0)
 
 # Setup pairwise correlation calculation and view
 library(Hmisc)
@@ -129,11 +133,12 @@ features_1 <- features_0 %>%
             edu_grad = (sum(edu_ms, edu_phd)),
             unemp, 
             below_pov
-  )
-view_corr(features_1)
+            )
+
 df_features_1 <- left_join(features_1, collisions, by = "GEOID")
 View(df_features_1)
 write.csv(df_features_1, "df_features_1.csv", row.names = FALSE)
+# view_corr(features_1)
 
 # Note: This iteration was mostly combining and removing variables
 #       without any normalization or transformation, with the exception
@@ -169,10 +174,11 @@ features_2 <- features_0 %>%
             perc_unemp = (unemp / pop), 
             perc_pov = (below_pov / pop)
             )
-view_corr(features_2)
+
 df_features_2 <- left_join(features_2, collisions, by = "GEOID")
 View(df_features_2)
 write.csv(df_features_2, "df_features_2.csv", row.names = FALSE)
+# view_corr(features_2)
 
 # Note: This iteration picks up from iteration 1, with the addition of
 #       normalization by population where applicable. No transformations
@@ -207,11 +213,12 @@ features_3 <- features_0 %>%
             grad_dens = (sum(edu_ms, edu_phd) / sqmi_land),
             unemp_dens = (unemp / sqmi_land), 
             pov_dens = (below_pov / sqmi_land)
-  )
-view_corr(features_3)
+            )
+
 df_features_3 <- left_join(features_3, collisions, by = "GEOID")
 View(df_features_3)
 write.csv(df_features_3, "df_features_3.csv", row.names = FALSE)
+# view_corr(features_3)
 
 # Note: This iteration differs from iteration 2 in that the variables are
 #       normalized by land square miles instead of population. No variables
