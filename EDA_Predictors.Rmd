@@ -1,0 +1,237 @@
+---
+title: "Visualizing Relationships of Variables"
+author: "Noah Branham"
+date: "January 30, 2019"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# load the necessary packages
+library(tidyverse)
+library(ggpubr)
+
+# data <- read_csv("C:/Users/n0284436/Documents/NYU_Stern_MSBA/Capstone/Master.1.20.2019.csv")
+head(data)
+
+### set up the data to look at collisions ###
+# subset nyc/dc to be variables only for scatter plot
+census <- data %>% select(26, 37:96)
+census <- unique(census)
+census$GEOID <- as.character(census$GEOID)
+
+# aggregate the collisions, injuries and deaths by city and census tracts and store it in an object called collisions
+collisions <- data %>%
+  group_by(City, GEOID) %>%
+  summarise(Collisions=n(), TotalInjuries=sum(TotalInjuries),TotalPedestrianInjuries=sum(TotalPedestrianInjuries),TotalDeaths=sum(TotalDeaths))
+collisions$GEOID <- as.character(collisions$GEOID)
+
+# now that we have our two main data frames we can join them together based on GEOID
+df <- left_join(census, collisions, by="GEOID")
+df <- unique( df[ , 1:66 ] )
+
+
+```
+
+## Look at the 4 potential target variables
+
+
+```{r}
+theme_set(
+  theme_classic() +
+    theme(legend.position = "top")
+)
+
+# visualize the target variables for each city
+nyc <- subset(df, City=="NYC")
+dc <- subset(df, City=="DC")
+la <- subset(df, City=="LA")
+
+# Total Injuries
+p1 <- qplot(nyc$TotalInjuries, geom="histogram", binwidth=10,xlab="Injuries", ylab="# of Census Tracts")
+p2 <- qplot(dc$TotalInjuries, geom="histogram", binwidth=10, xlab="Injuries", ylab="# of Census Tracts")
+p3 <- qplot(la$TotalInjuries, geom="histogram", binwidth=10, xlab="Injuries", ylab="# of Census Tracts")
+
+figure <- ggarrange(p1, p2, p3,
+          labels = c("NYC", "DC", "LA"),
+          ncol = 2, nrow = 2)
+annotate_figure(figure,
+                top = text_grob("Histogram of Injuries by City", color = "red", face = "bold", size = 14))
+                
+# Total Pedestrian Injuries
+p4 <- qplot(nyc$TotalPedestrianInjuries, geom="histogram", binwidth=5,xlab="Pedestrian Injuries", ylab="# of Census Tracts")
+p5 <- qplot(dc$TotalPedestrianInjuries, geom="histogram", binwidth=5, xlab="Pedestrian Injuries", ylab="# of Census Tracts")
+p6 <- qplot(la$TotalPedestrianInjuries, geom="histogram", binwidth=5, xlab="Pedestrian Injuries", ylab="# of Census Tracts")
+
+figure1 <- ggarrange(p4, p5, p6,
+                    labels = c("NYC", "DC", "LA"),
+                    ncol = 2, nrow = 2)
+annotate_figure(figure1,
+                top = text_grob("Histogram of Pedestrian Injuries by City", color = "red", face = "bold", size = 14))
+
+# Total Collisions
+p7 <- qplot(nyc$Collisions, geom="histogram", binwidth=10,xlab="Collisions", ylab="# of Census Tracts")
+p8 <- qplot(dc$Collisions, geom="histogram", binwidth=10, xlab="Collisions", ylab="# of Census Tracts")
+p9 <- qplot(la$Collisions, geom="histogram", binwidth=10, xlab="Collisions", ylab="# of Census Tracts")
+
+figure2 <- ggarrange(p1, p2, p3,
+          labels = c("NYC", "DC", "LA"),
+          ncol = 2, nrow = 2)
+annotate_figure(figure2,
+                top = text_grob("Histogram of Collisions by City", color = "red", face = "bold", size = 14))
+
+# Total Deaths
+p10 <- qplot(nyc$TotalDeaths, geom="histogram", binwidth=1,xlab="Deaths", ylab="# of Census Tracts")
+p11 <- qplot(dc$TotalDeaths, geom="histogram", binwidth=1, xlab="Deaths", ylab="# of Census Tracts")
+p12 <- qplot(la$TotalDeaths, geom="histogram", binwidth=1, xlab="Deaths", ylab="# of Census Tracts")
+
+figure3 <- ggarrange(p10, p11, p12,
+          labels = c("NYC", "DC", "LA"),
+          ncol = 2, nrow = 2)
+annotate_figure(figure3,
+                top = text_grob("Histogram of Deaths by City", color = "red", face = "bold", size = 14))
+```
+
+## Look at all of the Race Predictors
+# Look at a histogram of each Race Bucket by City
+
+```{r}
+# Histogram of Race White
+h1 <- qplot(nyc$race_white, geom="histogram", binwidth=5,xlab="Race White", ylab="# of Census Tracts")
+h2 <- qplot(dc$race_white, geom="histogram", binwidth=5, xlab="Race White", ylab="# of Census Tracts")
+h3 <- qplot(la$race_white, geom="histogram", binwidth=5, xlab="Race White", ylab="# of Census Tracts")
+
+hist1 <- ggarrange(h1, h2, h3,
+                    labels = c("NYC", "DC", "LA"),
+                    ncol = 2, nrow = 2)
+annotate_figure(hist1,
+                top = text_grob("Histogram of Race White", color = "red", face = "bold", size = 14))
+
+# Histogram of Race Black
+h4 <- qplot(nyc$race_black, geom="histogram", binwidth=5,xlab="Race Black", ylab="# of Census Tracts")
+h5 <- qplot(dc$race_black, geom="histogram", binwidth=5, xlab="Race Black", ylab="# of Census Tracts")
+h6 <- qplot(la$race_black, geom="histogram", binwidth=5, xlab="Race Black", ylab="# of Census Tracts")
+
+hist2 <- ggarrange(h4, h5, h6,
+                    labels = c("NYC", "DC", "LA"),
+                    ncol = 2, nrow = 2)
+annotate_figure(hist2,
+                top = text_grob("Histogram of Race Black", color = "red", face = "bold", size = 14))
+
+# Histogram of Race Native
+h7 <- qplot(nyc$race_native, geom="histogram", binwidth=5,xlab="Race Native", ylab="# of Census Tracts")
+h8 <- qplot(dc$race_native, geom="histogram", binwidth=5, xlab="Race Native", ylab="# of Census Tracts")
+h9 <- qplot(la$race_native, geom="histogram", binwidth=5, xlab="Race Native", ylab="# of Census Tracts")
+
+hist3 <- ggarrange(h7, h8, h9,
+                    labels = c("NYC", "DC", "LA"),
+                    ncol = 2, nrow = 2)
+annotate_figure(hist3,
+                top = text_grob("Histogram of Race Native", color = "red", face = "bold", size = 14))
+
+# Histogram of Race Asian
+h10 <- qplot(nyc$race_asian, geom="histogram", binwidth=5,xlab="Race Asian", ylab="# of Census Tracts")
+h11 <- qplot(dc$race_asian, geom="histogram", binwidth=5, xlab="Race Asian", ylab="# of Census Tracts")
+h12 <- qplot(la$race_asian, geom="histogram", binwidth=5, xlab="Race Asian", ylab="# of Census Tracts")
+
+hist4 <- ggarrange(h10, h11, h12,
+                    labels = c("NYC", "DC", "LA"),
+                    ncol = 2, nrow = 2)
+annotate_figure(hist4,
+                top = text_grob("Histogram of Race Asian", color = "red", face = "bold", size = 14))
+
+# Histogram of Race Hispanic
+h13 <- qplot(nyc$race_hispanic, geom="histogram", binwidth=5,xlab="Race Hispanic", ylab="# of Census Tracts")
+h14 <- qplot(dc$race_hispanic, geom="histogram", binwidth=5, xlab="Race Hispanic", ylab="# of Census Tracts")
+h15 <- qplot(la$race_hispanic, geom="histogram", binwidth=5, xlab="Race Hispanic", ylab="# of Census Tracts")
+
+hist5 <- ggarrange(h13, h14, h15,
+                    labels = c("NYC", "DC", "LA"),
+                    ncol = 2, nrow = 2)
+annotate_figure(hist5,
+                top = text_grob("Histogram of Race Hispanic", color = "red", face = "bold", size = 14))
+
+```
+
+# Look at the Scatter Plot of Total Pedestrian Injuries vs. Each Race Bucket
+
+
+```{r pressure}
+race <- c("City","TotalPedestrianInjuries","race_white","race_black","race_native","race_asian","race_hawaiian","race_other","race_twoplus","race_hispanic")
+df_race <- df[race]
+
+# Scatter Plot - Total Pedestrian Injuries vs. Race White
+b <- ggplot(df_race, aes(x=race_white, y=TotalPedestrianInjuries))
+b + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Race Black
+b2 <- ggplot(df_race, aes(x=race_black, y=TotalPedestrianInjuries))
+b2 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Race Native
+b3 <- ggplot(df_race, aes(x=race_native, y=TotalPedestrianInjuries))
+b3 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Race Asian
+b4 <- ggplot(df_race, aes(x=race_asian, y=TotalPedestrianInjuries))
+b4 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Race Hawiian
+b5 <- ggplot(df_race, aes(x=race_hawaiian, y=TotalPedestrianInjuries))
+b5 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Race Other
+b6 <- ggplot(df_race, aes(x=race_other, y=TotalPedestrianInjuries))
+b6 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Bi-Racial
+b7 <- ggplot(df_race, aes(x=race_twoplus, y=TotalPedestrianInjuries))
+b7 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Bi-Racial
+b8 <- ggplot(df_race, aes(x=race_twoplus, y=TotalPedestrianInjuries))
+b8 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+# Scatter Plot - Total Pedestrian Injuries vs. Hispanic
+b9 <- ggplot(df_race, aes(x=race_hispanic, y=TotalPedestrianInjuries))
+b9 + geom_point(aes(color = City, shape = City)) +
+  geom_point()+
+  geom_smooth(aes(color=City),method = "loess")+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
+  stat_cor(aes(color = City), label.x = 3)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
