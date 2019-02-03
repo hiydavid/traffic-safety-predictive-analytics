@@ -6,10 +6,8 @@
 ############################################################ CHANGE LOG
 # 2019-01-21    Created file
 # 2019-01-23    Updated to run different features in one workflow
-# 2019-01-28    Added with feature_3 data
-#               Excluded target variable related to deaths
-# 2019-02-02    Added casualties target and removed other targets
-#               Added ability to update and change working directory              
+# 2019-01-28    Added with feature_3 data and excluded death-related targets
+# 2019-02-02    Added casualties, ability to change director, added new variables
 
 ############################################################ LOAD & PREP
 
