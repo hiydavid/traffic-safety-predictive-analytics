@@ -69,7 +69,7 @@ area$GEOID <- as.character(area$GEOID)
 # Read in Ron's new variables
 new_vars <- read_csv("new_vars.csv")
 new_vars$GEOID <- as.character(new_vars$GEOID)
-new_vars <- new_vars[, -1]
+new_vars <- subset(new_vars, new_vars$City == 'NYC')
 
 # Geolocation lookup table
 geoloc <- collisions[, 2] %>%
@@ -254,11 +254,11 @@ features_4 <- new_vars %>%
             road_meanlength = MEAN_SECTION_LENGTH,
             road_totlanes = MEAN_TOTAL_LANES,
             road_maxlanes = MAX_TOTAL_LANES,
-            road_trucks = MEAN_ACTUAL_PCT_TRUCKS,
+            # road_trucks = MEAN_ACTUAL_PCT_TRUCKS,
             road_iri = MEAN_IRI,
             road_bumps = MEAN_I_NO_OF_BUMPS,
             road_aadt = MEAN_LAST_ACTUAL_AADT,
-            road_width = MEAN_MEDIAN_WIDTH,
+            # road_width = MEAN_MEDIAN_WIDTH,
             road_sumlength = SUM_Length_Miles,
             road_pci = MEAN_PCI,
             road_pavewidth = MEAN_TOTAL_PAVEMENT_WIDTH,
@@ -267,6 +267,7 @@ features_4 <- new_vars %>%
             pop = POPULATION_x,
             sqmi = SQMI_x
             )
+
 nyc_crash <- subset(collisions, collisions$City == 'NYC')
 df_features_4 <- left_join(features_4, nyc_crash, by = "GEOID")
 View(df_features_4)
