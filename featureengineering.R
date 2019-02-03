@@ -6,6 +6,7 @@
 # 2019-01-23  Updated to include pedestrian data
 # 2019-01-28  Updated with feature 3
 # 2019-02-02  Updatde with new_vars and casualties column
+#             Added a geolocation look-up table for future use
 
 
 
@@ -70,6 +71,13 @@ new_vars <- read_csv("new_vars.csv")
 new_vars$GEOID <- as.character(new_vars$GEOID)
 new_vars <- new_vars[, -1]
 
+# Geolocation lookup table
+geoloc <- collisions[, 2] %>%
+  left_join(new_vars, by = 'GEOID')
+geoloc <- geoloc[, c(1:3, 9)]
+geoloc <- na.omit(geoloc)
+write.csv(geoloc, "data_geoloc.csv", row.names = FALSE)
+
 
 ################################################## Prepare function to view correlations
 
@@ -97,13 +105,13 @@ view_corr <- function(df) {
 }
 
 # Review feature_0
-view_corr(features_0)
+# view_corr(features_0)
 
 
 
 ################################################## Merge, transform, and clean features
 
-############################## Iteration 1
+############################## Iteration 1 (Census Count Data with Bining)
 features_1 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
@@ -144,7 +152,7 @@ write.csv(df_features_1, "df_features_1.csv", row.names = FALSE)
 #       without any normalization or transformation, with the exception
 #       of normalizing population by land square miles.
 
-############################## Iteration 2
+############################## Iteration 2 (Census Data Normalized by Population)
 features_2 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
@@ -184,7 +192,7 @@ write.csv(df_features_2, "df_features_2.csv", row.names = FALSE)
 #       normalization by population where applicable. No transformations
 #       were done otherwise.
 
-############################## Iteration 3
+############################## Iteration 3 (Census Data Normalized by Land Use)
 features_3 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
@@ -224,15 +232,51 @@ write.csv(df_features_3, "df_features_3.csv", row.names = FALSE)
 #       normalized by land square miles instead of population. No variables
 #       were transformed.
 
-############################## Iteration 4
+############################## Iteration 4 (New Variables Only for NYC)
+features_4 <- new_vars %>%
+  group_by(GEOID) %>%
+  transmute(crime_idx = `2018 Total Crime Index`,
+            spend_alc = `Alcoholic Beverages`,
+            spend_trans = `Public/Other Transportation`,
+            biz_alc = `Beer/Wine/Liquor Stores:Bus`,
+            biz_resto = `Eating & Drinking Businesses (SIC)`,
+            biz_lib = `Education/Library Businesses (SIC)`,
+            biz_groc = `Food Stores - Businesses (SIC)`,
+            biz_health = `Health Services - Businesses (SIC)`,
+            biz_hotel = `Hotel/Lodging Businesses (SIC)`,
+            biz_retail = `Total Retail:Bus`,
+            fastfood_6mo = `Went to fast food/drive-in restaurant in last 6 mo`,
+            fastfood_freq = `Went to fast food/drive-in restaurant 9+ times/mo`,
+            road_maxspeed = MAX_POSTED_SPEED_LIMIT,
+            road_meanspeed = MEAN_POSTED_SPEED_LIMIT,
+            road_maxlength = MAX_SECTION_LENGTH,
+            road_minlength = MIN_SECTION_LENGTH,
+            road_meanlength = MEAN_SECTION_LENGTH,
+            road_totlanes = MEAN_TOTAL_LANES,
+            road_maxlanes = MAX_TOTAL_LANES,
+            road_trucks = MEAN_ACTUAL_PCT_TRUCKS,
+            road_iri = MEAN_IRI,
+            road_bumps = MEAN_I_NO_OF_BUMPS,
+            road_aadt = MEAN_LAST_ACTUAL_AADT,
+            road_width = MEAN_MEDIAN_WIDTH,
+            road_sumlength = SUM_Length_Miles,
+            road_pci = MEAN_PCI,
+            road_pavewidth = MEAN_TOTAL_PAVEMENT_WIDTH,
+            road_vc = MEAN_VC,
+            road_q = MEAN_q_score,
+            pop = POPULATION_x,
+            sqmi = SQMI_x
+            )
+nyc_crash <- subset(collisions, collisions$City == 'NYC')
+df_features_4 <- left_join(features_4, nyc_crash, by = "GEOID")
+View(df_features_4)
+write.csv(df_features_4, "df_features_4.csv", row.names = FALSE)
+# view_corr(features_4)
+
+# Note: This iteration contains only the new variables that Ron gathered for
+#       NYC's use. The purpose is to test how well these new variables alone
+#       perform on NYC.
+
+############################## Iteration 5 (Old & New Variables Only for NYC)
 
 # TO BE CONTINUED 
-
-
-
-
-
-# Review 
-hist(features_3['female_dens'])
-hist(log10(features_3['female_dens']))
-
