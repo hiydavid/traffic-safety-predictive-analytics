@@ -2,11 +2,11 @@
 # Capstone Modeling Preparation & Feature Engineering
 
 ##################################################  Change Log
-# 2019-01-21  Created file with feature 1 and 2
+# 2019-01-21  Created file with feature sets 1 and 2
 # 2019-01-23  Updated to include pedestrian data
-# 2019-01-28  Updated with feature 3
-# 2019-02-02  Updatde with new_vars and casualties column
-#             Added a geolocation look-up table for future use
+# 2019-01-28  Updated with feature set 3
+# 2019-02-02  Added feature set 4 and geolocation lookup table
+# 2019-02-04  Added feature set 5
 
 
 
@@ -84,6 +84,8 @@ write.csv(geoloc, "data_geoloc.csv", row.names = FALSE)
 # Merge tract size to census data
 features_0 <- left_join(census, area, by = "GEOID")
 View(features_0)
+# write.csv(features_0, "df_features_0.csv", row.names = FALSE)
+
 
 # Setup pairwise correlation calculation and view
 library(Hmisc)
@@ -145,7 +147,7 @@ features_1 <- features_0 %>%
 
 df_features_1 <- left_join(features_1, collisions, by = "GEOID")
 View(df_features_1)
-write.csv(df_features_1, "df_features_1.csv", row.names = FALSE)
+# write.csv(df_features_1, "df_features_1.csv", row.names = FALSE)
 # view_corr(features_1)
 
 # Note: This iteration was mostly combining and removing variables
@@ -185,7 +187,7 @@ features_2 <- features_0 %>%
 
 df_features_2 <- left_join(features_2, collisions, by = "GEOID")
 View(df_features_2)
-write.csv(df_features_2, "df_features_2.csv", row.names = FALSE)
+# write.csv(df_features_2, "df_features_2.csv", row.names = FALSE)
 # view_corr(features_2)
 
 # Note: This iteration picks up from iteration 1, with the addition of
@@ -225,7 +227,7 @@ features_3 <- features_0 %>%
 
 df_features_3 <- left_join(features_3, collisions, by = "GEOID")
 View(df_features_3)
-write.csv(df_features_3, "df_features_3.csv", row.names = FALSE)
+# write.csv(df_features_3, "df_features_3.csv", row.names = FALSE)
 # view_corr(features_3)
 
 # Note: This iteration differs from iteration 2 in that the variables are
@@ -271,7 +273,7 @@ features_4 <- new_vars %>%
 nyc_crash <- subset(collisions, collisions$City == 'NYC')
 df_features_4 <- left_join(features_4, nyc_crash, by = "GEOID")
 View(df_features_4)
-write.csv(df_features_4, "df_features_4.csv", row.names = FALSE)
+# write.csv(df_features_4, "df_features_4.csv", row.names = FALSE)
 # view_corr(features_4)
 
 # Note: This iteration contains only the new variables that Ron gathered for
@@ -279,5 +281,15 @@ write.csv(df_features_4, "df_features_4.csv", row.names = FALSE)
 #       perform on NYC.
 
 ############################## Iteration 5 (Old & New Variables Only for NYC)
+df_features_5 <- df_features_4 %>%
+  left_join(features_1, by = "GEOID")
+View(df_features_5)
+# write.csv(df_features_5, "df_features_5.csv", row.names = FALSE)
+# view_corr(features_5)
+
+# Note: This iteration combines features_1 (census data unnormalized) and 
+#       features_4 (new variables). This is for NYC analysis only. 
+
+############################## Iteration 6
 
 # TO BE CONTINUED 
