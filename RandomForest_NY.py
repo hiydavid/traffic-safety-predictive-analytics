@@ -94,6 +94,10 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     plt.title('Features Importances')
     plt.show()
     
+    # Return prediction output as dataframe
+    pred_output = pd.DataFrame({'y_test' : y_test, 'y_pred' : y_pred})
+    pred_output.to_csv('pred_output.csv', index = False)
+    
     # Spaceholder
     print("")
     print("END OF OUTPUT ***************************************")
