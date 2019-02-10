@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 import os
 
 # Set current directory (change to your own director)
-os.chdir('D:\_dhuang\Work\NYU Stern MSBA Work\Capstone\Data\CapstoneModeling')
+path = r"D:\_dhuang\Work\NYU Stern MSBA Work\Capstone\Data\CapstoneModeling"
+os.chdir(path)
 
 # Set options
 pd.set_option('display.max_rows', 100)
