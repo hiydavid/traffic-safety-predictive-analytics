@@ -48,8 +48,7 @@ from sklearn.metrics import mean_squared_error as MSE
 def rando(df, city, y_var, n_trees, depth, max_feat):
     
     # Split data into training and test sets
-    # geo = df[df['City'] == city].dropna(axis = 'rows')    # drop rows with NAs
-    geo = df[df['City'] == city].fillna(df.mean())          # fill NAs with average
+    geo = df[df['City'] == city].fillna(df.mean())
     X = geo.drop(['GEOID', 'City', 'Collisions', 'Casualties',
                    'PedeInjuries', 'PedeDeaths', 'TotalInjuries', 
                    'TotalDeaths'], axis = 1)
@@ -75,7 +74,7 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     test_score = rf.score(X_test, y_test)
     rmse_score = np.sqrt(MSE(y_test, y_pred))
     
-    # Prin restuls
+    # Prin results
     print("MODEL OUTPUT ****************************************")
     print("")
     print("Target City: {}".format(geo['City'].unique()))
@@ -99,13 +98,12 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     print("")
     print("END OF OUTPUT ***************************************")
     print("")
+        
 
 ############################################################ NYC, OVERALL CASUALTIES
     
 # Run random forest model on NYC, Total Injuries, Feature Set 1
-# Train Score 0.57 / Test Score 0.24 / RMSE 81.05
-# Top 5: pop_dens, race_minority, trav_trans, age_millenial, trav_walk
-# Bottom 5: trav_motorcycle, trav_bike, edu_genz, age_grad, widowed
+# Train Score 0.42 / Test Score 0.25 / RMSE 84.93
 rando(df = f1, 
       city = "NYC", 
       y_var = "Casualties", 
@@ -115,9 +113,7 @@ rando(df = f1,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 2
-# Train Score 0.51 / Test Score 0.25 / RMSE 80.31
-# Top 5: pop_dens, perc_minority, perc_walk, perc_bs, perc_hsged
-# Bottom 5: perc_mbike, perc_bike, perc_genx, perc_widowed, perc_retiree
+# Train Score 0.40 / Test Score 0.19 / RMSE 88.34
 rando(df = f2,
       city = "NYC", 
       y_var = "Casualties", 
@@ -127,9 +123,7 @@ rando(df = f2,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 3
-# Train Score 0.52 / Test Score 0.20 / RMSE 82.99
-# Top 5: cars_dens, bs_dens, boomber_dens, median_earnings, retiree_dens
-# Bottom 5: mbike_dens, bike_dens, female_dens, trans_dens, millenial_dens
+# Train Score 0.39 / Test Score 0.18 / RMSE 89.19
 rando(df = f3,
       city = "NYC", 
       y_var = "Casualties", 
@@ -139,9 +133,7 @@ rando(df = f3,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 4 (Ron's new features)
-# Train Score 0.74 / Test Score 0.45 / RMSE 89.04
-# Top 5: road_sumlength, sqml, crime_idx, road_aadt, road_maxlanes
-# Bottom 5: biz_alc, biz_health, biz_lib, fastfood_6mo, fastfood_freq
+# Train Score 0.73 / Test Score 0.49 / RMSE 70.41
 rando(df = f4,
       city = "NYC",
       y_var = "Casualties",
@@ -151,9 +143,7 @@ rando(df = f4,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 5 (f1 and f4 combination)
-# Train Score 0.71 / Test Score 0.54 / RMSE 75.08
-# Top 5: road_sumlength, road_maxlanes, crime_idx, biz_retail, sqmi
-# Bottom 5: trav_motorcycle, biz_alc, trav_bike, pop, age_retiree
+# Train Score 0.74 / Test Score 0.49 / RMSE 70.51
 rando(df = f5,
       city = "NYC",
       y_var = "Casualties",
