@@ -56,7 +56,7 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     
     # Split data into
     X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size = 0.4, random_state = SEED)
+            X, y, test_size = 0.3, random_state = SEED)
     
     # Model fitting
     rf = RandomForestRegressor(
@@ -90,13 +90,13 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     	data = rf.feature_importances_,
     	index = X_train.columns)
     importances_sorted = importances.sort_values()
-    importances_sorted.plot(kind = 'barh', color = 'lightgreen', figsize = (7, 10))
+    importances_sorted.plot(kind = 'barh', color = 'lightgreen', figsize = (7, 5))
     plt.title('Features Importances')
     plt.show()
     
     # Return prediction output as dataframe
-    pred_output = pd.DataFrame({'y_test' : y_test, 'y_pred' : y_pred})
-    pred_output.to_csv('pred_output.csv', index = False)
+    # pred_output = pd.DataFrame({'y_test' : y_test, 'y_pred' : y_pred})
+    # pred_output.to_csv('pred_output.csv', index = False)
     
     # Spaceholder
     print("")
@@ -107,7 +107,7 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
 ############################################################ NYC, OVERALL CASUALTIES
     
 # Run random forest model on NYC, Total Injuries, Feature Set 1
-# Train Score 0.42 / Test Score 0.25 / RMSE 84.93
+# Train Score 0.45 / Test Score 0.24 / RMSE 79.26
 rando(df = f1, 
       city = "NYC", 
       y_var = "Casualties", 
@@ -117,7 +117,7 @@ rando(df = f1,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 2
-# Train Score 0.40 / Test Score 0.19 / RMSE 88.34
+# Train Score 0.40 / Test Score 0.19 / RMSE 81.82
 rando(df = f2,
       city = "NYC", 
       y_var = "Casualties", 
@@ -127,7 +127,7 @@ rando(df = f2,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 3
-# Train Score 0.39 / Test Score 0.18 / RMSE 89.19
+# Train Score 0.41 / Test Score 0.17 / RMSE 82.87
 rando(df = f3,
       city = "NYC", 
       y_var = "Casualties", 
@@ -137,7 +137,7 @@ rando(df = f3,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 4 (Ron's new features)
-# Train Score 0.73 / Test Score 0.49 / RMSE 70.41
+# Train Score 0.72 / Test Score 0.47 / RMSE 66.08
 rando(df = f4,
       city = "NYC",
       y_var = "Casualties",
@@ -147,7 +147,7 @@ rando(df = f4,
       )
 
 # Run random forest model on NYC, Total Injuries, Feature Set 5 (f1 and f4 combination)
-# Train Score 0.74 / Test Score 0.49 / RMSE 70.51
+# Train Score 0.73 / Test Score 0.48 / RMSE 65.60
 rando(df = f5,
       city = "NYC",
       y_var = "Casualties",

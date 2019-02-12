@@ -54,7 +54,7 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     
     # Split data into
     X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size = 0.4, random_state = SEED)
+            X, y, test_size = 0.3, random_state = SEED)
     
     # Model fitting
     rf = RandomForestRegressor(
@@ -88,7 +88,7 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
     	data = rf.feature_importances_,
     	index = X_train.columns)
     importances_sorted = importances.sort_values()
-    importances_sorted.plot(kind = 'barh', color = 'lightgreen', figsize = (7, 10))
+    importances_sorted.plot(kind = 'barh', color = 'lightgreen', figsize = (7, 5))
     plt.title('Features Importances')
     plt.show()
     
@@ -104,7 +104,7 @@ def rando(df, city, y_var, n_trees, depth, max_feat):
 ############################################################ LA, OVERALL CASUALTIES
 
 # Run random forest model on LA, Total Injuries, Feature Set 1
-# Train Score 0.60 / Test Score 0.22 / RMSE 23.46
+# Train Score 0.59 / Test Score 0.20 / RMSE 23.95
 rando(df = f1, 
       city = "LA", 
       y_var = "Casualties", 
@@ -114,7 +114,7 @@ rando(df = f1,
       )
 
 # Run random forest model on LA, Total Injuries, Feature Set 2
-# Train Score 0.58 / Test Score 0.14 / RMSE 24.63
+# Train Score 0.57 / Test Score 0.18 / RMSE 24.17
 rando(df = f2, 
       city = "LA", 
       y_var = "Casualties", 
@@ -124,7 +124,7 @@ rando(df = f2,
       )
 
 # Run random forest model on LA, Total Injuries, Feature Set 3
-# Train Score 0.58 / Test Score 0.16 / RMSE 24.21
+# Train Score 0.56 / Test Score 0.16 / RMSE 24.49
 rando(df = f3,
       city = "LA", 
       y_var = "Casualties", 
