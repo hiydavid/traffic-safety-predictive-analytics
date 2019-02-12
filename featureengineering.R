@@ -79,6 +79,7 @@ geoloc <- na.omit(geoloc)
 write.csv(geoloc, "data_geoloc.csv", row.names = FALSE)
 
 
+
 ################################################## Prepare function to view correlations
 
 # Merge tract size to census data
@@ -114,6 +115,10 @@ view_corr <- function(df) {
 ################################################## Merge, transform, and clean features
 
 ############################## Iteration 1 (Census Count Data with Bining)
+# Note: This iteration was mostly combining and removing variables
+#       without any normalization or transformation, with the exception
+#       of normalizing population by land square miles.
+
 features_1 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
@@ -150,11 +155,11 @@ View(df_features_1)
 # write.csv(df_features_1, "df_features_1.csv", row.names = FALSE)
 # view_corr(features_1)
 
-# Note: This iteration was mostly combining and removing variables
-#       without any normalization or transformation, with the exception
-#       of normalizing population by land square miles.
-
 ############################## Iteration 2 (Census Data Normalized by Population)
+# Note: This iteration picks up from iteration 1, with the addition of
+#       normalization by population where applicable. No transformations
+#       were done otherwise.
+
 features_2 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
@@ -190,11 +195,11 @@ View(df_features_2)
 # write.csv(df_features_2, "df_features_2.csv", row.names = FALSE)
 # view_corr(features_2)
 
-# Note: This iteration picks up from iteration 1, with the addition of
-#       normalization by population where applicable. No transformations
-#       were done otherwise.
-
 ############################## Iteration 3 (Census Data Normalized by Land Use)
+# Note: This iteration differs from iteration 2 in that the variables are
+#       normalized by land square miles instead of population. No variables
+#       were transformed.
+
 features_3 <- features_0 %>%
   group_by(GEOID) %>%
   transmute(pop_dens = (pop / (sqmi_land)),
@@ -230,11 +235,11 @@ View(df_features_3)
 # write.csv(df_features_3, "df_features_3.csv", row.names = FALSE)
 # view_corr(features_3)
 
-# Note: This iteration differs from iteration 2 in that the variables are
-#       normalized by land square miles instead of population. No variables
-#       were transformed.
-
 ############################## Iteration 4 (New Variables Only for NYC)
+# Note: This iteration contains only the new variables that Ron gathered for
+#       NYC's use. The purpose is to test how well these new variables alone
+#       perform on NYC.
+
 features_4 <- new_vars %>%
   group_by(GEOID) %>%
   transmute(crime_idx = `2018 Total Crime Index`,
@@ -276,19 +281,15 @@ View(df_features_4)
 # write.csv(df_features_4, "df_features_4.csv", row.names = FALSE)
 # view_corr(features_4)
 
-# Note: This iteration contains only the new variables that Ron gathered for
-#       NYC's use. The purpose is to test how well these new variables alone
-#       perform on NYC.
-
 ############################## Iteration 5 (Old & New Variables Only for NYC)
+# Note: This iteration combines features_1 (census data unnormalized) and 
+#       features_4 (new variables). This is for NYC analysis only. 
+
 df_features_5 <- df_features_4 %>%
   left_join(features_1, by = "GEOID")
 View(df_features_5)
 # write.csv(df_features_5, "df_features_5.csv", row.names = FALSE)
 # view_corr(features_5)
-
-# Note: This iteration combines features_1 (census data unnormalized) and 
-#       features_4 (new variables). This is for NYC analysis only. 
 
 ############################## Iteration 6
 
