@@ -20,6 +20,7 @@ library(ggplot2)
 library(lubridate)
 library(scales)
 library(tidycensus)
+library(corrplot)
 
 # Set directory (change to your own directory)
 setwd("D:/_dhuang/Work/NYU Stern MSBA Work/Capstone/Data/CapstoneModeling")
@@ -87,6 +88,9 @@ features_0 <- left_join(census, area, by = "GEOID")
 View(features_0)
 # write.csv(features_0, "df_features_0.csv", row.names = FALSE)
 
+# View corrplot of features_o
+f0 <- cor(na.omit(features_0[, c(-1, -62, -63, -64)]))
+corrplot(f0, method = "circle", type = "upper")
 
 # Setup pairwise correlation calculation and view
 library(Hmisc)
