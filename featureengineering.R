@@ -306,6 +306,6 @@ df_features_6 <- df_features_1 %>%
             median_earnings, trav_cars, trav_trans, trav_motorcycle, trav_bike, trav_walk,
             trav_home, edu_lowedu, edu_hsged, edu_bs, edu_grad, unemp, below_pov, City,
             Collisions, Casualties, PedeInjuries, PedeDeaths, TotalInjuries, TotalDeaths,
-            Casualties_Norm = Casualties / (pop_dens + 1))
+            Casualties = Casualties / (pop_dens + 1))
 View(df_features_6)
 # write.csv(df_features_6, "df_features_6.csv", row.names = FALSE)
