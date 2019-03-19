@@ -33,6 +33,7 @@ f2 = pd.read_csv('df_features_2.csv')       # Normalized by population
 f3 = pd.read_csv('df_features_3.csv')       # Normalized by land
 f4 = pd.read_csv('df_features_4.csv')       # Ron's new variables
 f5 = pd.read_csv('df_features_5.csv')       # Features 1 and 4 combined
+f6 = pd.read_csv('df_features_6.csv')       # Features 1 with normalized Casualties
 
 # Setting random state
 SEED = 1234
@@ -149,6 +150,16 @@ rando(df = f4,
 # Run random forest model on NYC, Total Injuries, Feature Set 5 (f1 and f4 combination)
 # Train Score 0.73 / Test Score 0.48 / RMSE 65.60
 rando(df = f5,
+      city = "NYC",
+      y_var = "Casualties",
+      n_trees = 500,
+      depth = 5,
+      max_feat = 0.50
+      )
+
+# Run random forest model on NYC, Total Injuries (Normalized), Features Set 6
+# Train Score 0.89 / Test Score 0.41 / RMSE 0.31
+rando(df = f6,
       city = "NYC",
       y_var = "Casualties",
       n_trees = 500,
