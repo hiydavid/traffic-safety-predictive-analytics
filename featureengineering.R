@@ -293,7 +293,6 @@ df_features_5 <- df_features_4 %>%
   left_join(features_1, by = "GEOID")
 View(df_features_5)
 # write.csv(df_features_5, "df_features_5.csv", row.names = FALSE)
-# view_corr(features_5)
 
 ############################## Iteration 6 (Feature 1 with Normalized Target Variable)
 # NoteL This iteration combines features_1 but with normalized target variable (Casualties).
@@ -307,3 +306,4 @@ df_features_6 <- df_features_1 %>%
             Collisions, Casualties, PedeInjuries, PedeDeaths, TotalInjuries, TotalDeaths,
             Casualties_Norm = Casualties / pop_dens)
 View(df_features_6)
+# write.csv(df_features_6, "df_features_6.csv", row.names = FALSE)
