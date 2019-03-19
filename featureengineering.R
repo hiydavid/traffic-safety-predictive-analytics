@@ -303,7 +303,7 @@ df_features_6 <- df_features_1 %>%
             age_genx, age_boomer, age_retiree, divsep, widowed, median_age, not_us_citizen,
             median_earnings, trav_cars, trav_trans, trav_motorcycle, trav_bike, trav_walk,
             trav_home, edu_lowedu, edu_hsged, edu_bs, edu_grad, unemp, below_pov, City,
-            Collisions, Casualties, PedeInjuries, PedeDeaths, TotalInjuries, TotalDeaths,
-            Casualties_Norm = Casualties / pop_dens)
+            Collisions, PedeInjuries, PedeDeaths, TotalInjuries, TotalDeaths,
+            Casualties = Casualties / pop_dens)
 View(df_features_6)
 # write.csv(df_features_6, "df_features_6.csv", row.names = FALSE)
