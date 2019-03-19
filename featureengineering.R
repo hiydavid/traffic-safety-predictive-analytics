@@ -77,7 +77,7 @@ geoloc <- collisions[, 2] %>%
   left_join(new_vars, by = 'GEOID')
 geoloc <- geoloc[, c(1:3, 9)]
 geoloc <- na.omit(geoloc)
-write.csv(geoloc, "data_geoloc.csv", row.names = FALSE)
+# write.csv(geoloc, "data_geoloc.csv", row.names = FALSE)
 
 
 
@@ -293,17 +293,19 @@ df_features_5 <- df_features_4 %>%
   left_join(features_1, by = "GEOID")
 View(df_features_5)
 # write.csv(df_features_5, "df_features_5.csv", row.names = FALSE)
+# view_corr(features_5)
 
 ############################## Iteration 6 (Feature 1 with Normalized Target Variable)
 # NoteL This iteration combines features_1 but with normalized target variable (Casualties).
 
+# df_features_1$pop_dens <- replace_na(df_features_1$pop_dens, mean(df_features_1$pop_dens, na.rm = TRUE))
 df_features_6 <- df_features_1 %>%
   group_by(GEOID) %>%
   transmute(pop_dens, race_white, race_minority, female, age_genz, age_millenial, 
             age_genx, age_boomer, age_retiree, divsep, widowed, median_age, not_us_citizen,
             median_earnings, trav_cars, trav_trans, trav_motorcycle, trav_bike, trav_walk,
             trav_home, edu_lowedu, edu_hsged, edu_bs, edu_grad, unemp, below_pov, City,
-            Collisions, PedeInjuries, PedeDeaths, TotalInjuries, TotalDeaths,
-            Casualties = Casualties / pop_dens)
+            Collisions, Casualties, PedeInjuries, PedeDeaths, TotalInjuries, TotalDeaths,
+            Casualties_Norm = Casualties / (pop_dens + 1))
 View(df_features_6)
 # write.csv(df_features_6, "df_features_6.csv", row.names = FALSE)
