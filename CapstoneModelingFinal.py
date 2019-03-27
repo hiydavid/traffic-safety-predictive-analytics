@@ -40,7 +40,7 @@ data_3 = data_3.fillna(data_3.mean())
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 
           'TotalInjuries', 'TotalDeaths', 'Collisions', 'CasualtiesCount', 
           'pop_dens', 'pop']
-keep_y = 'CasualtiesPerPop'
+target_y = 'CasualtiesPerPop'
 
 
 
@@ -53,26 +53,26 @@ def run_models(data_i, n_trees, depth, max_feat):
     if data_i == 'data_1':
         df = data_1
         X = df.drop(drop_X, axis=1)
-        y = df[keep_y]
+        y = df[target_y]
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
     elif data_i == 'data_2':
         df = data_2
         X = df.drop(drop_X, axis=1)
-        y = df[keep_y]
+        y = df[target_y]
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
     elif data_i == 'data_3':
         df = data_3
-        drop_city = df['City'] == 'LA'
-        train_city = df[-drop_city]
-        test_city = df[drop_city]
+        target_city = df['City'] == 'LA'
+        train_city = df[-target_city]
+        test_city = df[target_city]
         X_train = train_city.drop(drop_X, axis=1)
         X_test = test_city.drop(drop_X, axis=1)
-        y_train = train_city[keep_y]
-        y_test = test_city[keep_y]
+        y_train = train_city[target_y]
+        y_test = test_city[target_y]
         y = y_test
     
     # Train and test random forest model
