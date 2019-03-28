@@ -16,8 +16,12 @@ from sklearn import cross_validation
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import mean_absolute_error as MAE
-from matplotlib import pyplot
 from sklearn.model_selection import train_test_split
+from statsmodels.tools.eval_measures import rmse
+import statsmodels.api as sm
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsRegressor
+from matplotlib import pyplot
 
 # Set options
 pd.set_option('display.max_rows', 100)
@@ -34,7 +38,8 @@ data_2 = pd.read_csv('ny_census_arcgis.csv')
 data_2 = data_2.fillna(data_2.mean())
 data_3 = pd.read_csv('ny_la_census.csv')
 data_3 = data_3.fillna(data_3.mean())
-
+data_4 = pd.read_csv('ny_dc_census.csv')
+data_4 = data_4.fillna(data_4.mean())
 
 # Drop variables
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 
@@ -47,7 +52,7 @@ target_y = 'CasualtiesPerPop'
 ############################################################ Modeling Functions
 
 # Define workflow function
-def run_models(data_i, n_trees, depth, max_feat):
+def run_models(data_i, kfold, n_trees, depth, max_feat):
     
     # Define data input
     if data_i == 'data_1':
@@ -74,7 +79,37 @@ def run_models(data_i, n_trees, depth, max_feat):
         y_train = train_city[target_y]
         y_test = test_city[target_y]
         y = y_test
+    elif data_i == 'data_4':
+        df = data_4
+        target_city = df['City'] == 'DC'
+        train_city = df[-target_city]
+        test_city = df[target_city]
+        X_train = train_city.drop(drop_X, axis=1)
+        X_test = test_city.drop(drop_X, axis=1)
+        y_train = train_city[target_y]
+        y_test = test_city[target_y]
+        y = y_test
     
+    # Train and test negative binomial model
+    negbinom = sm.GLM(
+            y_train, 
+            X_train,
+            family = sm.families.NegativeBinomial()
+            ).fit()
+    negbinom_pred = negbinom.predict(X_test)
+    negbinom_rmse = rmse(y_test, negbinom_pred)
+    negbinom_mae = MAE(y_test, negbinom_pred)
+    
+    # Train and test k-nearst neighbors model
+    ss = StandardScaler()
+    X_train_scaled = ss.fit_transform(X_train)
+    X_test_scaled = ss.fit_transform(X_test)
+    knn = KNeighborsRegressor(n_neighbors = 6)
+    knn.fit(X_train_scaled, y_train)
+    knn_pred = knn.predict(X_test_scaled)
+    knn_rmse = np.sqrt(MSE(y_test, knn_pred))
+    knn_mae = MAE(y_test, knn_pred)
+        
     # Train and test random forest model
     rf = RandomForestRegressor(
         n_estimators = n_trees, 
@@ -101,33 +136,49 @@ def run_models(data_i, n_trees, depth, max_feat):
     xgb_mae = MAE(y_test, xgb_pred)
     
     # Print model scores
+    print(" ")
+    print("MODEL PERFORMANCE")
     print("======================================================================")
-    print("Random Forest Results:")
+    print("Target Stdev: {:.4f}".format(np.std(y)))
+    print(" ")
+    print("NEGATIVE BINOMIAL")
+    print("Model RMSE: {:.4f}".format(negbinom_rmse))
+    print("Model MAE: {:.4f}".format(negbinom_mae))
+    print(" ")
+    print("K-NEASREST NEIGHBOR")
+    print("Model RMSE: {:.4f}".format(knn_rmse))
+    print("Model MAE: {:.4f}".format(knn_mae))
+    print(" ")
+    print("RANDOM FOREST")
     print("Model RMSE: {:.4f}".format(rf_rmse))
     print("Model MAE: {:.4f}".format(rf_mae))
-    print("Target Stdev: {:.4f}".format(np.std(y)))
+    print(" ")
+    print("XGBOOST")
+    print("Model RMSE: {:.4f}".format(xgb_rmse))
+    print("Model MAE: {:.4f}".format(xgb_mae))
+    print(" ")
+    
+    # Print variable importance from Random Forest & XGBoost
+    print("FEATURE IMPORTANCE")
+    print("======================================================================")   
     importances = pd.Series(
     data = rf.feature_importances_,
     index = X_train.columns)
     importances_sorted = importances.sort_values()
     importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6, 4))
-    plt.title('Features Importances')
+    plt.title('Random Forest Feature Importance')
     plt.show()
-
-    print("======================================================================")
-    print("XGBoost Results:")
-    print("Model RMSE: {:.4f}".format(xgb_rmse))
-    print("Model MAE: {:.4f}".format(xgb_mae))
-    print("Target Stdev: {:.4f}".format(np.std(y)))
-    plot_importance(xgb)
-    pyplot.show()
+    print(" ")
+    plot_importance(xgb, importance_type  = "weight", title = 'XGBoost Feature Importance')
+    plt.show()
     
 
 
 ############################################################ Run Modeling & Anlayze Results
 
 run_models(
-        data_i = 'data_1', 
+        data_i = 'data_1',
+        kfold = 5,
         n_trees = 1000, 
         depth = 5, 
         max_feat = 0.75
@@ -135,6 +186,7 @@ run_models(
 
 run_models(
         data_i = 'data_2', 
+        kfold = 5,
         n_trees = 1000, 
         depth = 5, 
         max_feat = 0.75
@@ -142,6 +194,15 @@ run_models(
 
 run_models(
         data_i = 'data_3', 
+        kfold = 5,
+        n_trees = 1000, 
+        depth = 5, 
+        max_feat = 0.75
+        )
+
+run_models(
+        data_i = 'data_4', 
+        kfold = 5,
         n_trees = 1000, 
         depth = 5, 
         max_feat = 0.75
