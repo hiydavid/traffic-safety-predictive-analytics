@@ -11,8 +11,6 @@ import os
 import xgboost
 from xgboost import plot_importance
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import cross_validate
-from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import mean_absolute_error as MAE
@@ -143,8 +141,7 @@ def run_models(data_i, k, n_trees, depth, max_feat, viz):
         n_estimators = n_trees,
         learning_rate = 0.08,
         gamma = 0,
-        subsample = max_feat,
-        colsample_bytree = 1,
+        colsample_bytree = max_feat,
         max_depth = depth
     )
     xgb.fit(X_train, y_train)
