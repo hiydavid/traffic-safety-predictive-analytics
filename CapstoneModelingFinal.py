@@ -53,7 +53,7 @@ target_y = 'CasualtiesPerPop'
 ############################################################ Modeling Functions
 
 ### Define workflow function
-def run_models(data_i, k, n_trees, depth, max_feat, viz):
+def run_models(data_i, k, n_trees, depth, max_feat):
 
     ### Define data input
     if data_i == 'data_1':
@@ -79,7 +79,6 @@ def run_models(data_i, k, n_trees, depth, max_feat, viz):
         X_test = test_city.drop(drop_X, axis=1)
         y_train = train_city[target_y]
         y_test = test_city[target_y]
-        y = y_test
     elif data_i == 'data_4':
         df = data_4
         target_city = df['City'] == 'DC'
@@ -89,7 +88,6 @@ def run_models(data_i, k, n_trees, depth, max_feat, viz):
         X_test = test_city.drop(drop_X, axis=1)
         y_train = train_city[target_y]
         y_test = test_city[target_y]
-        y = y_test
 
     ### Train and test negative binomial model
     negbinom = sm.GLM(
@@ -153,7 +151,8 @@ def run_models(data_i, k, n_trees, depth, max_feat, viz):
     print(" ")
     print("======================================================================")
     print("MODEL PERFORMANCE")
-    print("  Target Stdev: {:.4f}".format(np.std(y)))
+    print("  Target Stdev: {:.4f}".format(np.std(y_test)))
+    print("  Target MAE: {:.4f}".format(abs(y_test - np.mean(y_test)).mean()))
     print(" ")
     print("NEGATIVE BINOMIAL")
     print("  Model RMSE: {:.4f}".format(negbinom_rmse))
@@ -177,20 +176,17 @@ def run_models(data_i, k, n_trees, depth, max_feat, viz):
     # Print variable importance from Random Forest & XGBoost
     print("======================================================================")
     print("FEATURE IMPORTANCE")
-    if viz == 'y':
-        importances = pd.Series(
-                data = rf.feature_importances_,
-                index = X_train.columns)
-        importances_sorted = importances.sort_values()
-        importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6, 4))
-        plt.title('Random Forest Feature Importance')
-        plt.show()
-        print(" ")
-        plot_importance(xgb, importance_type  = "weight", title = 'XGBoost Feature Importance')
-        plt.show()
-    elif viz == 'n' :
-        print(" ")
-        print("...No visual outputs...")
+    importances = pd.Series(
+            data = rf.feature_importances_,
+            index = X_train.columns
+            )
+    importances_sorted = importances.sort_values()
+    importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6, 4))
+    plt.title('Random Forest Feature Importance')
+    plt.show()
+    print(" ")
+    plot_importance(xgb, importance_type  = "weight", title = 'XGBoost Feature Importance')
+    plt.show()
 
 
 
@@ -202,8 +198,7 @@ run_models(
         k = 4,
         n_trees = 1000,
         depth = 5,
-        max_feat = 0.75,
-        viz = 'y'
+        max_feat = 0.75
         )
 
 # Train NYC Test NYC with Census & Road Condition Data
@@ -212,8 +207,7 @@ run_models(
         k = 4,
         n_trees = 1000,
         depth = 5,
-        max_feat = 0.75,
-        viz = 'y'
+        max_feat = 0.75
         )
 
 # Train NYC Test LA with Census Only
@@ -222,8 +216,7 @@ run_models(
         k = 5,
         n_trees = 1000,
         depth = 5,
-        max_feat = 0.75,
-        viz = 'y'
+        max_feat = 0.75
         )
 
 # Train NYC Test DC with Census Only
@@ -232,6 +225,5 @@ run_models(
         k = 5,
         n_trees = 1000,
         depth = 5,
-        max_feat = 0.75,
-        viz = 'y'
+        max_feat = 0.75
         )
