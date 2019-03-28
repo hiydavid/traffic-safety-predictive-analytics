@@ -180,7 +180,7 @@ def run_models(data_i, k, n_trees, depth, max_feat, viz):
     # Print variable importance from Random Forest & XGBoost
     print("======================================================================")
     print("FEATURE IMPORTANCE")
-    if viz == "y":
+    if viz == 'y':
         importances = pd.Series(
                 data = rf.feature_importances_,
                 index = X_train.columns)
@@ -191,9 +191,9 @@ def run_models(data_i, k, n_trees, depth, max_feat, viz):
         print(" ")
         plot_importance(xgb, importance_type  = "weight", title = 'XGBoost Feature Importance')
         plt.show()
-    elif viz == "n" :
+    elif viz == 'n' :
         print(" ")
-        print("No Viz Output")
+        print("...No visual outputs...")
 
 
 
@@ -206,16 +206,17 @@ run_models(
         n_trees = 1000,
         depth = 5,
         max_feat = 0.75,
-        viz = "n"
+        viz = 'y'
         )
 
 # Train NYC Test NYC with Census & Road Condition Data
 run_models(
         data_i = 'data_2',
-        k = 3,
+        k = 4,
         n_trees = 1000,
         depth = 5,
-        max_feat = 0.75
+        max_feat = 0.75,
+        viz = 'y'
         )
 
 # Train NYC Test LA with Census Only
@@ -224,7 +225,8 @@ run_models(
         k = 5,
         n_trees = 1000,
         depth = 5,
-        max_feat = 0.75
+        max_feat = 0.75,
+        viz = 'y'
         )
 
 # Train NYC Test DC with Census Only
@@ -233,5 +235,6 @@ run_models(
         k = 5,
         n_trees = 1000,
         depth = 5,
-        max_feat = 0.75
+        max_feat = 0.75,
+        viz = 'y'
         )
