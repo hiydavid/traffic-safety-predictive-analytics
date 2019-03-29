@@ -11,6 +11,7 @@ import os
 import xgboost
 from xgboost import plot_importance
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import mean_absolute_error as MAE
@@ -27,16 +28,18 @@ pd.set_option('display.max_columns', 100)
 pd.set_option('display.float_format', '{:,.5f}'.format)
 
 # Set current directory (change depending on which local machine)
-# path = r"/Users/dhua22/Desktop/MSBA"
-# path = r"D:\_dhuang\Work\NYU Stern MSBA Work\Capstone\Data\CapstoneModeling"
-# os.chdir(path)
+path = r"/Users/dhua22/Desktop/MSBA"
+os.chdir(path)
 
-# Loading Data
+# Loading data sets
 data_1 = pd.read_csv('ny_census.csv')
+
 data_2 = pd.read_csv('ny_census_arcgis.csv')
 data_2 = data_2.fillna(data_2.mean())
+
 data_3 = pd.read_csv('ny_la_census.csv')
 data_3 = data_3.fillna(data_3.mean())
+
 data_4 = pd.read_csv('ny_dc_census.csv')
 data_4 = data_4.fillna(data_4.mean())
 
@@ -134,7 +137,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     rf_rmse = np.sqrt(MSE(y_test, rf_pred))
     rf_mae = MAE(y_test, rf_pred)
 
-    # Train and test xgboost model
+    ### Train and test xgboost model
     xgb = xgboost.XGBRegressor(
         n_estimators = n_trees,
         learning_rate = 0.08,
@@ -142,6 +145,14 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         colsample_bytree = max_feat,
         max_depth = depth
     )
+    kfold = KFold(n_splits = k)
+    xgb_cv = - cross_val_score(
+        xgb,
+        X_train,
+        y_train,
+        cv = kfold,
+        scoring = 'neg_mean_squared_error'
+        ).mean()
     xgb.fit(X_train, y_train)
     xgb_pred = xgb.predict(X_test)
     xgb_rmse = np.sqrt(MSE(y_test, xgb_pred))
@@ -151,26 +162,29 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     print(" ")
     print("======================================================================")
     print("MODEL PERFORMANCE")
-    print("  Target Stdev: {:.4f}".format(np.std(y_test)))
-    print("  Target MAE: {:.4f}".format(abs(y_test - np.mean(y_test)).mean()))
+    print(" ")
+    print("TARGET BASELINE")
+    print("  Target Stdev: {:.2f}".format(np.std(y_test)))
+    print("  Target MAE: {:.2f}".format(abs(y_test - np.mean(y_test)).mean()))
     print(" ")
     print("NEGATIVE BINOMIAL")
-    print("  Model RMSE: {:.4f}".format(negbinom_rmse))
-    print("  Model MAE: {:.4f}".format(negbinom_mae))
+    print("  Model RMSE: {:.2f}".format(negbinom_rmse))
+    print("  Model MAE: {:.2f}".format(negbinom_mae))
     print(" ")
     print("K-NEAREST NEIGHBOR")
-    print("  CV RMSE: {:.4f}".format(np.sqrt(knn_cv)))
-    print("  Model RMSE: {:.4f}".format(knn_rmse))
-    print("  Model MAE: {:.4f}".format(knn_mae))
+    print("  CV RMSE: {:.2f}".format(np.sqrt(knn_cv)))
+    print("  Model RMSE: {:.2f}".format(knn_rmse))
+    print("  Model MAE: {:.2f}".format(knn_mae))
     print(" ")
     print("RANDOM FOREST")
-    print("  CV RMSE: {:.4f}".format(np.sqrt(rf_cv)))
-    print("  Model RMSE: {:.4f}".format(rf_rmse))
-    print("  Model MAE: {:.4f}".format(rf_mae))
+    print("  CV RMSE: {:.2f}".format(np.sqrt(rf_cv)))
+    print("  Model RMSE: {:.2f}".format(rf_rmse))
+    print("  Model MAE: {:.2f}".format(rf_mae))
     print(" ")
     print("EXTREME GRADIENT BOOST")
-    print("  Model RMSE: {:.4f}".format(xgb_rmse))
-    print("  Model MAE: {:.4f}".format(xgb_mae))
+    print("  CV RMSE: {:.2f}".format(np.sqrt(xgb_cv)))
+    print("  Model RMSE: {:.2f}".format(xgb_rmse))
+    print("  Model MAE: {:.2f}".format(xgb_mae))
     print(" ")
 
     # Print variable importance from Random Forest & XGBoost
@@ -195,35 +209,35 @@ def run_models(data_i, k, n_trees, depth, max_feat):
 # Train NYC Test NYC with Census Only
 run_models(
         data_i = 'data_1',
-        k = 4,
-        n_trees = 1000,
+        k = 5,
+        n_trees = 500,
         depth = 5,
-        max_feat = 0.75
+        max_feat = 0.50
         )
 
 # Train NYC Test NYC with Census & Road Condition Data
 run_models(
         data_i = 'data_2',
-        k = 4,
-        n_trees = 1000,
+        k = 5,
+        n_trees = 500,
         depth = 5,
-        max_feat = 0.75
+        max_feat = 0.50
         )
 
 # Train NYC Test LA with Census Only
 run_models(
         data_i = 'data_3',
         k = 5,
-        n_trees = 1000,
+        n_trees = 500,
         depth = 5,
-        max_feat = 0.75
+        max_feat = 0.50
         )
 
 # Train NYC Test DC with Census Only
 run_models(
         data_i = 'data_4',
         k = 5,
-        n_trees = 1000,
+        n_trees = 50,
         depth = 5,
-        max_feat = 0.75
+        max_feat = 0.50
         )
