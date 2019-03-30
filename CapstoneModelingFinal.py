@@ -45,9 +45,9 @@ data_4 = pd.read_csv('ny_dc_census.csv')
 data_4 = data_4.fillna(data_4.mean())
 
 # Drop variables
-drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop',
-          'TotalInjuries', 'TotalDeaths', 'Collisions', 'CasualtiesCount',
-          'pop_dens', 'pop']
+drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 
+          'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 
+          'Collisions', 'CasualtiesCount', 'pop_dens', 'pop']
 
 # Target variable
 target_y = 'CasualtiesPerPop'
@@ -218,14 +218,14 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             )
     importances_sorted = importances.sort_values()[-9:]
     importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6, 4))
-    plt.title('Random Forest Feature Importance')
+    plt.title('Random Forest Top 10 Features')
     plt.show()
     print(" ")
     plot_importance(
             xgb, 
             max_num_features = 10, 
             importance_type = "weight", 
-            title = 'XGBoost Feature Importance')
+            title = 'XGBoost Top 10 Features')
     plt.show()
 
 
