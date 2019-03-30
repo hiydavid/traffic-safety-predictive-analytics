@@ -13,7 +13,6 @@ def bigfatgreek_ranking(preds, actual):
     preds = preds.to_frame()
     actual = actual.to_frame()
     # concatonate the 2 values into a data frame
-    #rank_df = pd.concat([preds, actual], ignore_index=True, axis=1)
     rank_df = pd.concat([preds.reset_index(drop=True), actual.reset_index(drop=True)], ignore_index=True, axis=1)
     # rename the columns
     rank_df.columns = ['preds','actual']
