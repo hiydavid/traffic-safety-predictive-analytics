@@ -1,10 +1,20 @@
-# define ranking function that takes two arguments
 def bigfatgreek_ranking(preds, actual):
-    # convert input values values to a dataframe
+    
+    # if input data is numpy array convert to series
+    if type(preds) == np.ndarray:
+        preds = pd.Series(preds)
+    else:
+        preds = preds
+    if type(actual) == np.ndarray:
+        actual = pd.Series(actual)
+    else:
+        actual = actual
+    # if input data is series convert input values values to a dataframe
     preds = preds.to_frame()
     actual = actual.to_frame()
     # concatonate the 2 values into a data frame
-    rank_df = pd.concat([preds, actual], ignore_index=True, axis=1)
+    #rank_df = pd.concat([preds, actual], ignore_index=True, axis=1)
+    rank_df = pd.concat([preds.reset_index(drop=True), actual.reset_index(drop=True)], ignore_index=True, axis=1)
     # rename the columns
     rank_df.columns = ['preds','actual']
     # sort the values by actual rank
