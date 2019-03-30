@@ -29,6 +29,7 @@ pd.set_option('display.float_format', '{:,.5f}'.format)
 
 # Set current directory (change depending on which local machine)
 path = r"/Users/dhua22/Desktop/MSBA"
+path = r"D:/_dhuang/Work/NYU Stern MSBA Work/Capstone/Data/CapstoneModeling"
 os.chdir(path)
 
 # Loading data sets
@@ -161,6 +162,27 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     # Print model scores
     print(" ")
     print("======================================================================")
+    if data_i == 'data_1':
+        print("ITERATION:")
+        print("Train & Test on NYC with Census Features")
+        print("Target Variable:", target_y)
+        print(" ")
+    elif data_i == 'data_2':
+        print("ITERATION:")
+        print("Train & Test on NYC with Census & Raoad Features")
+        print("Target Variable:", target_y)
+        print(" ")
+    elif data_i == 'data_3':
+        print("ITERATION:")
+        print("Train on NYC & Test on LA with Census Features")
+        print("Target Variable:", target_y)
+        print(" ")
+    elif data_i == 'data_4':
+        print("ITERATION:")
+        print("Train on NYC & Test on DC with Census Features")
+        print("Target Variable:", target_y)
+        print(" ")
+    print("======================================================================")
     print("MODEL PERFORMANCE")
     print(" ")
     print("TARGET BASELINE")
@@ -194,12 +216,16 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             data = rf.feature_importances_,
             index = X_train.columns
             )
-    importances_sorted = importances.sort_values()
+    importances_sorted = importances.sort_values()[-9:]
     importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6, 4))
     plt.title('Random Forest Feature Importance')
     plt.show()
     print(" ")
-    plot_importance(xgb, importance_type  = "weight", title = 'XGBoost Feature Importance')
+    plot_importance(
+            xgb, 
+            max_num_features = 10, 
+            importance_type = "weight", 
+            title = 'XGBoost Feature Importance')
     plt.show()
 
 
