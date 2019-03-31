@@ -1,5 +1,5 @@
-def bigfatgreek_ranking(preds, actual):
-    
+# define ranking function that takes two arguments
+def panos_ranking(preds, actual):
     # if input data is numpy array convert to series
     if type(preds) == np.ndarray:
         preds = pd.Series(preds)
