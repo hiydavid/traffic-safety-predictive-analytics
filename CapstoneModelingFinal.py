@@ -51,6 +51,12 @@ data_5 = pd.read_csv('ny_census_perc.csv')
 data_6 = pd.read_csv('ny_census_arcgis_perc.csv')
 data_6 = data_6.fillna(data_6.mean())
 
+data_7 = pd.read_csv('ny_la_census_perc.csv')
+data_7 = data_7.fillna(data_7.mean())
+
+data_8 = pd.read_csv('ny_dc_census_perc.csv')
+data_8 = data_8.fillna(data_8.mean())
+
 # Drop variables
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualtiesCount',
           'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions',
@@ -63,6 +69,7 @@ target_y = 'CasualtiesCount'
 
 ############################################################ Ranking Functions
 
+### Define ranking function
 def panos_ranking(preds, actual):
 
     # if input data is numpy array convert to series
@@ -179,6 +186,24 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
+    elif data_i == 'data_7':
+        df = data_7
+        target_city = df['City'] == 'LA'
+        train_city = df[-target_city]
+        test_city = df[target_city]
+        X_train = train_city.drop(drop_X, axis=1)
+        X_test = test_city.drop(drop_X, axis=1)
+        y_train = train_city[target_y]
+        y_test = test_city[target_y]
+    elif data_i == 'data_8':
+        df = data_8
+        target_city = df['City'] == 'DC'
+        train_city = df[-target_city]
+        test_city = df[target_city]
+        X_train = train_city.drop(drop_X, axis=1)
+        X_test = test_city.drop(drop_X, axis=1)
+        y_train = train_city[target_y]
+        y_test = test_city[target_y]
 
     ### Train and test negative binomial model
     negbinom = sm.GLM(
@@ -283,6 +308,16 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         print("Train & Test on NYC with Proportionalized Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
+    elif data_i == 'data_7':
+        print("ITERATION:")
+        print("Train on NYC & Test on LA with Proportionalized Census")
+        print("Target Variable:", target_y)
+        print(" ")
+    elif data_i == 'data_8':
+        print("ITERATION:")
+        print("Train on NYC & Test on DC with Proportionalized Census & Road Features")
+        print("Target Variable:", target_y)
+        print(" ")
     print("======================================================================")
     print("MODEL PERFORMANCE")
     print(" ")
@@ -370,6 +405,10 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         plt.title('Train & Test on NYC with Proportionalized Census Features')
     elif data_i == 'data_6':
         plt.title('Train & Test on NYC with Proportionalized Census & Road Features')
+    elif data_i == 'data_7':
+        plt.title('Train on NYC & Test on LA with Proportionalized Census')
+    elif data_i == 'data_8':
+        plt.title('Train on NYC & Test on DC with Proportionalized Census')
     plt.figure(figsize = (6.5, 4))
     plt.show()
 
@@ -404,6 +443,15 @@ run_models(
         max_feat = 0.50
         )
 
+# Train NYC Test NYC with Proportionalized Census & Road Condition Data
+run_models(
+        data_i = 'data_6',
+        k = 5,
+        n_trees = 500,
+        depth = 5,
+        max_feat = 0.50
+        )
+
 # Train NYC Test LA with Census Only
 run_models(
         data_i = 'data_3',
@@ -413,9 +461,27 @@ run_models(
         max_feat = 0.50
         )
 
+# Train NYC Test LA with Proportionalized Census Only
+run_models(
+        data_i = 'data_7',
+        k = 5,
+        n_trees = 500,
+        depth = 5,
+        max_feat = 0.50
+        )
+
 # Train NYC Test DC with Census Only
 run_models(
         data_i = 'data_4',
+        k = 5,
+        n_trees = 50,
+        depth = 5,
+        max_feat = 0.50
+        )
+
+# Train NYC Test DC with Proportionalized Census Only
+run_models(
+        data_i = 'data_8',
         k = 5,
         n_trees = 50,
         depth = 5,
