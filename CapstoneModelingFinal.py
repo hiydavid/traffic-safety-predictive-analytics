@@ -47,7 +47,7 @@ data_4 = data_4.fillna(data_4.mean())
 # Drop variables
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualtiesCount',
           'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions', 
-          'CasualtiesCount', 'pop_dens', 'pop']
+          'CasualtiesCount', 'pop']
 
 # Target variable
 target_y = 'CasualtiesCount'
