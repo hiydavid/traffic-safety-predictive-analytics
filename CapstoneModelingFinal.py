@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import warnings
 
 # Load machine learning packages
 import xgboost
@@ -23,6 +24,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 
 # Set options
+warnings.filterwarnings('ignore')
 pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.float_format', '{:,.5f}'.format)
@@ -46,6 +48,9 @@ data_4 = data_4.fillna(data_4.mean())
 
 data_5 = pd.read_csv('ny_census_perc.csv')
 
+data_6 = pd.read_csv('ny_census_arcgis_perc.csv')
+data_6 = data_6.fillna(data_6.mean())
+
 # Drop variables
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualtiesCount',
           'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions',
@@ -58,7 +63,6 @@ target_y = 'CasualtiesCount'
 
 ############################################################ Ranking Functions
 
-### Define ranking function
 def panos_ranking(preds, actual):
 
     # if input data is numpy array convert to series
@@ -168,6 +172,13 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
+    elif data_i == 'data_6':
+        df = data_6
+        X = df.drop(drop_X, axis=1)
+        y = df[target_y]
+        strat = df[['Borough', 'Class']].values
+        X_train, X_test, y_train, y_test = train_test_split(
+                X, y, stratify = strat, test_size = 0.30, random_state = 1234)
 
     ### Train and test negative binomial model
     negbinom = sm.GLM(
@@ -267,6 +278,11 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         print("Train & Test on NYC with Proportionalized Census Features")
         print("Target Variable:", target_y)
         print(" ")
+    elif data_i == 'data_6':
+        print("ITERATION:")
+        print("Train & Test on NYC with Proportionalized Census & Road Features")
+        print("Target Variable:", target_y)
+        print(" ")
     print("======================================================================")
     print("MODEL PERFORMANCE")
     print(" ")
@@ -352,6 +368,8 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         plt.title('Train on NYC & Test on DC with Census Features')
     elif data_i == 'data_5':
         plt.title('Train & Test on NYC with Proportionalized Census Features')
+    elif data_i == 'data_6':
+        plt.title('Train & Test on NYC with Proportionalized Census & Road Features')
     plt.figure(figsize = (6.5, 4))
     plt.show()
 
