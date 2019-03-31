@@ -45,12 +45,79 @@ data_4 = pd.read_csv('ny_dc_census.csv')
 data_4 = data_4.fillna(data_4.mean())
 
 # Drop variables
-drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 
-          'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 
-          'Collisions', 'CasualtiesCount', 'pop_dens', 'pop']
+drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualtiesCount',
+          'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions', 
+          'CasualtiesCount', 'pop_dens', 'pop']
 
 # Target variable
-target_y = 'CasualtiesPerPop'
+target_y = 'CasualtiesCount'
+
+
+
+############################################################ Ranking Functions
+
+# define ranking function that takes two arguments
+def panos_ranking(preds, actual):
+    
+    # if input data is numpy array convert to series
+    if type(preds) == np.ndarray:
+        preds = pd.Series(preds)
+    else:
+        preds = preds
+    if type(actual) == np.ndarray:
+        actual = pd.Series(actual)
+    else:
+        actual = actual
+    
+    # if input data is series convert input values values to a dataframe
+    preds = preds.to_frame()
+    actual = actual.to_frame()
+    # concatonate the 2 values into a data frame
+    rank_df = pd.concat([preds.reset_index(drop=True), actual.reset_index(drop=True)], ignore_index=True, axis=1)
+    # rename the columns
+    rank_df.columns = ['preds','actual']
+    # sort the values by actual rank
+    rank_df = rank_df.sort_values(by='actual', ascending=False)
+    # rank the actuals
+    rank_df['actual_rank'] = rank_df['actual'].rank(ascending=False)
+    # rank the preds
+    rank_df['pred_rank'] = rank_df['preds'].rank(ascending=False)
+    # calculate the perfect score
+    rank_df['PerfectScoreTotal'] = rank_df['actual'].cumsum()
+    # copy the dataframe
+    pred_df = rank_df.copy()
+    # sort the values by actual rank
+    pred_df = pred_df.sort_values(by='preds', ascending=False)
+    # drop the perfectscore column to avoid duplicate columns
+    pred_df = pred_df.drop(['PerfectScoreTotal'], axis=1)
+    # merge necessary columns together
+    final_df = pd.concat([pred_df.reset_index(drop=True),rank_df['PerfectScoreTotal'].reset_index(drop=True)],axis=1)
+    # Create PerfectScore_Remaining_Casualties
+    final_df['PerfectScore_Remaining_Casualties'] = final_df['actual'].sum()-final_df['PerfectScoreTotal']
+    # Create PerfectScore_Random
+    final_df['PerfectScore_Random'] = final_df['PerfectScore_Remaining_Casualties']/(final_df['actual'].count()-final_df['pred_rank']+1)
+    # Create Perfect_GainOverRandom
+    final_df['Perfect_GainOverRandom'] = final_df['PerfectScoreTotal'].diff()-final_df['PerfectScore_Random'].shift(1)
+    final_df['Perfect_GainOverRandom'].iloc[0] = final_df['PerfectScoreTotal'].iloc[0]-final_df['PerfectScore_Random'].iloc[0]
+    # Create Perfect_TotalGainOverRandom
+    final_df['Perfect_TotalGainOverRandom'] = final_df['Perfect_GainOverRandom']
+    final_df['Perfect_TotalGainOverRandom'].iloc[1:] = final_df['Perfect_TotalGainOverRandom'].cumsum()
+    # Create Total Actual
+    final_df['Total_Actual'] = final_df['actual'].cumsum()
+    # Create Remaining Casualties
+    final_df['Remaining Casualties'] = final_df['actual'].sum()
+    final_df['Remaining Casualties'].iloc[1:] = final_df['actual'].sum()-final_df['Total_Actual'].shift(1)
+    # Create RandomScore
+    final_df['RandomScore'] = final_df['Remaining Casualties']/(final_df['actual'].count()-final_df['pred_rank']+1)
+    # Create GainOverRandom
+    final_df['GainOverRandom'] = final_df['actual']-final_df['RandomScore']
+    # Create TotalGainOverRandom
+    final_df['TotalGainOverRandom'] = final_df['GainOverRandom']
+    final_df['TotalGainOverRandom'].iloc[1:] = final_df['GainOverRandom'].cumsum()
+    # Create Gain_Over_PerfectGain
+    final_df['Gain_Over_PerfectGain'] = final_df['TotalGainOverRandom']/final_df['Perfect_TotalGainOverRandom']
+    # print the first 5 rows
+    return final_df
 
 
 
@@ -102,6 +169,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     negbinom_pred = negbinom.predict(X_test)
     negbinom_rmse = rmse(y_test, negbinom_pred)
     negbinom_mae = MAE(y_test, negbinom_pred)
+    negbinom_ranking = panos_ranking(negbinom_pred, y_test)
 
     ### Train, validate, and test k-nearest neighbors model
     ss = StandardScaler()
@@ -119,6 +187,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     knn_pred = knn.predict(X_test_scaled)
     knn_rmse = np.sqrt(MSE(y_test, knn_pred))
     knn_mae = MAE(y_test, knn_pred)
+    knn_ranking = panos_ranking(knn_pred, y_test)
 
     ### Train, validate, and test random forest model
     rf = RandomForestRegressor(
@@ -137,6 +206,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     rf_pred = rf.predict(X_test)
     rf_rmse = np.sqrt(MSE(y_test, rf_pred))
     rf_mae = MAE(y_test, rf_pred)
+    rf_ranking = panos_ranking(rf_pred, y_test)
 
     ### Train and test xgboost model
     xgb = xgboost.XGBRegressor(
@@ -158,6 +228,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     xgb_pred = xgb.predict(X_test)
     xgb_rmse = np.sqrt(MSE(y_test, xgb_pred))
     xgb_mae = MAE(y_test, xgb_pred)
+    xgb_ranking = panos_ranking(xgb_pred, y_test)
 
     # Print model scores
     print(" ")
@@ -217,7 +288,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             index = X_train.columns
             )
     importances_sorted = importances.sort_values()[-9:]
-    importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6, 4))
+    importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6.5, 4))
     plt.title('Random Forest Top 10 Features')
     plt.show()
     print(" ")
@@ -227,6 +298,20 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             importance_type = "weight", 
             title = 'XGBoost Top 10 Features')
     plt.show()
+    
+    # Print ranking performance chart
+    plt.plot(negbinom_ranking['pred_rank'], negbinom_ranking['Perfect_TotalGainOverRandom'], color='blue', label = 'Perfect Ranking')
+    plt.plot(negbinom_ranking['pred_rank'], negbinom_ranking['TotalGainOverRandom'], color='red', label = 'Neg Binom Ranking')
+    plt.plot(negbinom_ranking['pred_rank'], knn_ranking['TotalGainOverRandom'], color='green', label = 'K-NN Ranking')
+    plt.plot(negbinom_ranking['pred_rank'], rf_ranking['TotalGainOverRandom'], color='yellow',label = 'Random Forest Ranking')
+    plt.plot(negbinom_ranking['pred_rank'], xgb_ranking['TotalGainOverRandom'], color='gray', label = 'XGBoost Ranking')
+    plt.xlabel('Predicted Rank Position')
+    plt.ylabel('Cumulative Gain Score')
+    plt.legend(loc = 'upper left')
+    plt.title('Ranking Performance')
+    plt.figure(figsize = (6.5, 4))
+    plt.show()
+    
 
 
 
