@@ -46,7 +46,7 @@ data_4 = data_4.fillna(data_4.mean())
 
 # Drop variables
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualtiesCount',
-          'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions', 
+          'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions',
           'CasualtiesCount', 'pop']
 
 # Target variable
@@ -56,9 +56,8 @@ target_y = 'CasualtiesCount'
 
 ############################################################ Ranking Functions
 
-# define ranking function that takes two arguments
 def panos_ranking(preds, actual):
-    
+
     # if input data is numpy array convert to series
     if type(preds) == np.ndarray:
         preds = pd.Series(preds)
@@ -68,7 +67,7 @@ def panos_ranking(preds, actual):
         actual = pd.Series(actual)
     else:
         actual = actual
-    
+
     # if input data is series convert input values values to a dataframe
     preds = preds.to_frame()
     actual = actual.to_frame()
@@ -293,12 +292,12 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     plt.show()
     print(" ")
     plot_importance(
-            xgb, 
-            max_num_features = 10, 
-            importance_type = "weight", 
+            xgb,
+            max_num_features = 10,
+            importance_type = "weight",
             title = 'XGBoost Top 10 Features')
     plt.show()
-    
+
     # Print ranking performance chart
     plt.plot(negbinom_ranking['pred_rank'], negbinom_ranking['Perfect_TotalGainOverRandom'], color='blue', label = 'Perfect Ranking')
     plt.plot(negbinom_ranking['pred_rank'], negbinom_ranking['TotalGainOverRandom'], color='red', label = 'Neg Binom Ranking')
@@ -308,10 +307,16 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     plt.xlabel('Predicted Rank Position')
     plt.ylabel('Cumulative Gain Score')
     plt.legend(loc = 'upper left')
-    plt.title('Ranking Performance')
+    if data_i == 'data_1':
+        plt.title('Train & Test on NYC with Census Features')
+    elif data_i == 'data_2':
+        plt.title('Train & Test on NYC with Census & Raoad Features')
+    elif data_i == 'data_3':
+        plt.title('Train on NYC & Test on LA with Census Features')
+    elif data_i == 'data_4':
+        plt.title('Train on NYC & Test on DC with Census Features')
     plt.figure(figsize = (6.5, 4))
     plt.show()
-    
 
 
 
