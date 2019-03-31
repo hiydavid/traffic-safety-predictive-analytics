@@ -239,7 +239,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         print(" ")
     elif data_i == 'data_2':
         print("ITERATION:")
-        print("Train & Test on NYC with Census & Raoad Features")
+        print("Train & Test on NYC with Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
     elif data_i == 'data_3':
@@ -310,7 +310,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     if data_i == 'data_1':
         plt.title('Train & Test on NYC with Census Features')
     elif data_i == 'data_2':
-        plt.title('Train & Test on NYC with Census & Raoad Features')
+        plt.title('Train & Test on NYC with Census & Road Features')
     elif data_i == 'data_3':
         plt.title('Train on NYC & Test on LA with Census Features')
     elif data_i == 'data_4':
