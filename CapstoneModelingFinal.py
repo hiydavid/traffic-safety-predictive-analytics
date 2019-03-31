@@ -299,11 +299,31 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     plt.show()
 
     # Print ranking performance chart
-    plt.plot(negbinom_ranking['pred_rank'], negbinom_ranking['Perfect_TotalGainOverRandom'], color='blue', label = 'Perfect Ranking')
-    plt.plot(negbinom_ranking['pred_rank'], negbinom_ranking['TotalGainOverRandom'], color='red', label = 'Neg Binom Ranking')
-    plt.plot(negbinom_ranking['pred_rank'], knn_ranking['TotalGainOverRandom'], color='green', label = 'K-NN Ranking')
-    plt.plot(negbinom_ranking['pred_rank'], rf_ranking['TotalGainOverRandom'], color='yellow',label = 'Random Forest Ranking')
-    plt.plot(negbinom_ranking['pred_rank'], xgb_ranking['TotalGainOverRandom'], color='gray', label = 'XGBoost Ranking')
+    plt.plot(
+        negbinom_ranking['pred_rank'],
+        negbinom_ranking['Perfect_TotalGainOverRandom'],
+        color ='blue',
+        label = 'Perfect Ranking')
+    plt.plot(
+        negbinom_ranking['pred_rank'],
+        negbinom_ranking['TotalGainOverRandom'],
+        color ='red',
+        label = 'Neg Binom Ranking')
+    plt.plot(
+        negbinom_ranking['pred_rank'],
+        knn_ranking['TotalGainOverRandom'],
+        color ='green',
+        label = 'K-NN Ranking')
+    plt.plot(
+        negbinom_ranking['pred_rank'],
+        rf_ranking['TotalGainOverRandom'],
+        color ='yellow',
+        label = 'Random Forest Ranking')
+    plt.plot(
+        negbinom_ranking['pred_rank'],
+        xgb_ranking['TotalGainOverRandom'],
+        color = 'gray',
+        label = 'XGBoost Ranking')
     plt.xlabel('Predicted Rank Position')
     plt.ylabel('Cumulative Gain Score')
     plt.legend(loc = 'upper left')
