@@ -44,6 +44,8 @@ data_3 = data_3.fillna(data_3.mean())
 data_4 = pd.read_csv('ny_dc_census.csv')
 data_4 = data_4.fillna(data_4.mean())
 
+data_5 = pd.read_csv('ny_census_perc.csv')
+
 # Drop variables
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualtiesCount',
           'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions',
@@ -56,6 +58,7 @@ target_y = 'CasualtiesCount'
 
 ############################################################ Ranking Functions
 
+### Define ranking function
 def panos_ranking(preds, actual):
 
     # if input data is numpy array convert to series
@@ -158,6 +161,13 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         X_test = test_city.drop(drop_X, axis=1)
         y_train = train_city[target_y]
         y_test = test_city[target_y]
+    elif data_i == 'data_5':
+        df = data_5
+        X = df.drop(drop_X, axis=1)
+        y = df[target_y]
+        strat = df[['Borough', 'Class']].values
+        X_train, X_test, y_train, y_test = train_test_split(
+                X, y, stratify = strat, test_size = 0.30, random_state = 1234)
 
     ### Train and test negative binomial model
     negbinom = sm.GLM(
@@ -252,6 +262,11 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         print("Train on NYC & Test on DC with Census Features")
         print("Target Variable:", target_y)
         print(" ")
+    elif data_i == 'data_5':
+        print("ITERATION:")
+        print("Train & Test on NYC with Proportionalized Census Features")
+        print("Target Variable:", target_y)
+        print(" ")
     print("======================================================================")
     print("MODEL PERFORMANCE")
     print(" ")
@@ -335,6 +350,8 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         plt.title('Train on NYC & Test on LA with Census Features')
     elif data_i == 'data_4':
         plt.title('Train on NYC & Test on DC with Census Features')
+    elif data_i == 'data_5':
+        plt.title('Train & Test on NYC with Proportionalized Census Features')
     plt.figure(figsize = (6.5, 4))
     plt.show()
 
@@ -347,6 +364,15 @@ run_models(
         data_i = 'data_1',
         k = 5,
         n_trees = 500,
+        depth = 5,
+        max_feat = 0.50
+        )
+
+# Train & Test on NYC with Proprotionalized Census Features
+run_models(
+        data_i = 'data_5',
+        k = 5,
+        n_trees = 50,
         depth = 5,
         max_feat = 0.50
         )
