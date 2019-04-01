@@ -300,22 +300,22 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         print(" ")
     elif data_i == 'data_5':
         print("ITERATION:")
-        print("Train & Test on NYC with Proportionalized Census Features")
+        print("Train & Test on NYC with Proportioned Census Features")
         print("Target Variable:", target_y)
         print(" ")
     elif data_i == 'data_6':
         print("ITERATION:")
-        print("Train & Test on NYC with Proportionalized Census & Road Features")
+        print("Train & Test on NYC with Proportioned Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
     elif data_i == 'data_7':
         print("ITERATION:")
-        print("Train on NYC & Test on LA with Proportionalized Census")
+        print("Train on NYC & Test on LA with Proportioned Census")
         print("Target Variable:", target_y)
         print(" ")
     elif data_i == 'data_8':
         print("ITERATION:")
-        print("Train on NYC & Test on DC with Proportionalized Census & Road Features")
+        print("Train on NYC & Test on DC with Proportioned Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
     print("======================================================================")
@@ -402,13 +402,13 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     elif data_i == 'data_4':
         plt.title('Train on NYC & Test on DC with Census Features')
     elif data_i == 'data_5':
-        plt.title('Train & Test on NYC with Proportionalized Census Features')
+        plt.title('Train & Test on NYC with Proportioned Census Features')
     elif data_i == 'data_6':
-        plt.title('Train & Test on NYC with Proportionalized Census & Road Features')
+        plt.title('Train & Test on NYC with Proportioned Census & Road Features')
     elif data_i == 'data_7':
-        plt.title('Train on NYC & Test on LA with Proportionalized Census')
+        plt.title('Train on NYC & Test on LA with Proportioned Census')
     elif data_i == 'data_8':
-        plt.title('Train on NYC & Test on DC with Proportionalized Census')
+        plt.title('Train on NYC & Test on DC with Proportioned Census')
     plt.figure(figsize = (6.5, 4))
     plt.show()
 
@@ -425,27 +425,9 @@ run_models(
         max_feat = 0.50
         )
 
-# Train & Test on NYC with Proprotionalized Census Features
-run_models(
-        data_i = 'data_5',
-        k = 5,
-        n_trees = 50,
-        depth = 5,
-        max_feat = 0.50
-        )
-
 # Train NYC Test NYC with Census & Road Condition Data
 run_models(
         data_i = 'data_2',
-        k = 5,
-        n_trees = 500,
-        depth = 5,
-        max_feat = 0.50
-        )
-
-# Train NYC Test NYC with Proportionalized Census & Road Condition Data
-run_models(
-        data_i = 'data_6',
         k = 5,
         n_trees = 500,
         depth = 5,
@@ -461,15 +443,6 @@ run_models(
         max_feat = 0.50
         )
 
-# Train NYC Test LA with Proportionalized Census Only
-run_models(
-        data_i = 'data_7',
-        k = 5,
-        n_trees = 500,
-        depth = 5,
-        max_feat = 0.50
-        )
-
 # Train NYC Test DC with Census Only
 run_models(
         data_i = 'data_4',
@@ -479,7 +452,34 @@ run_models(
         max_feat = 0.50
         )
 
-# Train NYC Test DC with Proportionalized Census Only
+# Train & Test on NYC with Proportioned Census Features
+run_models(
+        data_i = 'data_5',
+        k = 5,
+        n_trees = 50,
+        depth = 5,
+        max_feat = 0.50
+        )
+
+# Train NYC Test NYC with Proportioned Census & Road Condition Data
+run_models(
+        data_i = 'data_6',
+        k = 5,
+        n_trees = 500,
+        depth = 5,
+        max_feat = 0.50
+        )
+
+# Train NYC Test LA with Proportioned Census Only
+run_models(
+        data_i = 'data_7',
+        k = 5,
+        n_trees = 500,
+        depth = 5,
+        max_feat = 0.50
+        )
+
+# Train NYC Test DC with Proportioned Census Only
 run_models(
         data_i = 'data_8',
         k = 5,
