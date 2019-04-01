@@ -63,7 +63,7 @@ drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualti
           'CasualtiesCount', 'pop']
 
 # Target variable
-target_y = 'CasualtiesCount'
+target_y = 'CasualtiesPerPop'
 
 
 
@@ -324,8 +324,8 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     print("MODEL PERFORMANCE")
     print(" ")
     print("TARGET BASELINE")
-    print("  Target Stdev: {:.2f}".format(np.std(y_test)))
-    print("  Target MAE: {:.2f}".format(abs(y_test - np.mean(y_test)).mean()))
+    print("  Test Set Stdev: {:.2f}".format(np.std(y_test)))
+    print("  Test Set MAE: {:.2f}".format(abs(y_test - np.mean(y_test)).mean()))
     print(" ")  
     results_dict = {
             'Model' : ['Negative Binomial', 'K-Nearest Neighbors', 'Random Forest', 'XGBoost'],
@@ -335,6 +335,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             }
     results_df = pd.DataFrame.from_dict(results_dict)
     print(results_df)
+    print(" ")  
 
     # Print variable importance from Random Forest & XGBoost
     print("======================================================================")
@@ -345,13 +346,13 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             index = X_train.columns
             )
     importances_sorted = importances.sort_values()[-9:]
-    importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6.5, 3))
+    importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (5, 3))
     plt.ylabel('Features')
     plt.title('Random Forest Top 10 Features')
     plt.show()
     
     # XGBoost Feature Importance Chart
-    fig, ax = plt.subplots(figsize = (6.5, 3))
+    fig, ax = plt.subplots(figsize = (5, 3))
     plot_importance(
             xgb,
             max_num_features = 10,
@@ -391,7 +392,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         label = 'XGBoost Ranking')
     plt.xlabel('Predicted Rank Position')
     plt.ylabel('Cumulative Gain Score')
-    plt.legend(loc = 'upper left')
+    plt.legend()
     if data_i == 'data_1':
         plt.title('Train & Test on NYC with Census Features')
     elif data_i == 'data_2':
@@ -408,7 +409,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         plt.title('Train on NYC & Test on LA with Proportioned Census')
     elif data_i == 'data_8':
         plt.title('Train on NYC & Test on DC with Proportioned Census')
-    plt.figure(figsize = (6.5, 4))
+    plt.figure(figsize = (5, 4))
     plt.show()
 
 
