@@ -275,7 +275,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     xgb_mae = MAE(y_test, xgb_pred)
     xgb_ranking = panos_ranking(xgb_pred, y_test)
 
-    # Print model scores
+    # Print iteration titles
     print(" ")
     print("======================================================================")
     if data_i == 'data_1':
@@ -318,53 +318,52 @@ def run_models(data_i, k, n_trees, depth, max_feat):
         print("Train on NYC & Test on DC with Proportioned Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
+    
+    # Print model scores
     print("======================================================================")
     print("MODEL PERFORMANCE")
     print(" ")
     print("TARGET BASELINE")
     print("  Target Stdev: {:.2f}".format(np.std(y_test)))
     print("  Target MAE: {:.2f}".format(abs(y_test - np.mean(y_test)).mean()))
-    print(" ")
-    print("NEGATIVE BINOMIAL")
-    print("  Model RMSE: {:.2f}".format(negbinom_rmse))
-    print("  Model MAE: {:.2f}".format(negbinom_mae))
-    print(" ")
-    print("K-NEAREST NEIGHBOR")
-    print("  CV RMSE: {:.2f}".format(np.sqrt(knn_cv)))
-    print("  Model RMSE: {:.2f}".format(knn_rmse))
-    print("  Model MAE: {:.2f}".format(knn_mae))
-    print(" ")
-    print("RANDOM FOREST")
-    print("  CV RMSE: {:.2f}".format(np.sqrt(rf_cv)))
-    print("  Model RMSE: {:.2f}".format(rf_rmse))
-    print("  Model MAE: {:.2f}".format(rf_mae))
-    print(" ")
-    print("EXTREME GRADIENT BOOST")
-    print("  CV RMSE: {:.2f}".format(np.sqrt(xgb_cv)))
-    print("  Model RMSE: {:.2f}".format(xgb_rmse))
-    print("  Model MAE: {:.2f}".format(xgb_mae))
-    print(" ")
+    print(" ")  
+    results_dict = {
+            'Model' : ['Negative Binomial', 'K-Nearest Neighbors', 'Random Forest', 'XGBoost'],
+            'CV RMSE' : ['n/a', np.sqrt(knn_cv), np.sqrt(rf_cv), np.sqrt(xgb_cv)],
+            'Prediction RMSE' : [negbinom_rmse, knn_rmse, rf_rmse, xgb_rmse],
+            'Prediction MAE' : [negbinom_mae, knn_mae, rf_mae, xgb_mae]
+            }
+    results_df = pd.DataFrame.from_dict(results_dict)
+    print(results_df)
 
     # Print variable importance from Random Forest & XGBoost
     print("======================================================================")
     print("FEATURE IMPORTANCE")
+    # Random Forest Feature Importance Chart
     importances = pd.Series(
             data = rf.feature_importances_,
             index = X_train.columns
             )
     importances_sorted = importances.sort_values()[-9:]
-    importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6.5, 4))
+    importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (6.5, 3))
+    plt.ylabel('Features')
     plt.title('Random Forest Top 10 Features')
     plt.show()
-    print(" ")
+    
+    # XGBoost Feature Importance Chart
+    fig, ax = plt.subplots(figsize = (6.5, 3))
     plot_importance(
             xgb,
             max_num_features = 10,
             importance_type = "weight",
-            title = 'XGBoost Top 10 Features')
+            title = 'XGBoost Top 10 Features',
+            ax = ax)
     plt.show()
+    print(" ")
 
     # Print ranking performance chart
+    print("======================================================================")
+    print("RANKING PERFORMANCE")
     plt.plot(
         negbinom_ranking['pred_rank'],
         negbinom_ranking['Perfect_TotalGainOverRandom'],
@@ -383,7 +382,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     plt.plot(
         negbinom_ranking['pred_rank'],
         rf_ranking['TotalGainOverRandom'],
-        color ='yellow',
+        color ='orange',
         label = 'Random Forest Ranking')
     plt.plot(
         negbinom_ranking['pred_rank'],
