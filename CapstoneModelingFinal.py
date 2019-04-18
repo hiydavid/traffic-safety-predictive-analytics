@@ -20,6 +20,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from statsmodels.tools.eval_measures import rmse
 import statsmodels.api as sm
+from statsmodels.discrete.discrete_model import NegativeBinomialResults
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 
@@ -30,49 +31,45 @@ pd.set_option('display.max_columns', 100)
 pd.set_option('display.float_format', '{:,.5f}'.format)
 
 # Set current directory (change depending on which local machine)
-path = r"/Users/dhua22/Desktop/MSBA"
-path = r"D:/_dhuang/Work/NYU Stern MSBA Work/Capstone/Data/CapstoneModeling"
+path = r"/Users/dhua22/Documents/Jupyter/FileInput"
 os.chdir(path)
 
-# Loading data sets
+# Loading data sets for base model
 data_1 = pd.read_csv('ny_census.csv')
-
 data_2 = pd.read_csv('ny_census_arcgis.csv')
 data_2 = data_2.fillna(data_2.mean())
-
 data_3 = pd.read_csv('ny_la_census.csv')
 data_3 = data_3.fillna(data_3.mean())
-
 data_4 = pd.read_csv('ny_dc_census.csv')
 data_4 = data_4.fillna(data_4.mean())
-
 data_5 = pd.read_csv('ny_census_perc.csv')
-
 data_6 = pd.read_csv('ny_census_arcgis_perc.csv')
 data_6 = data_6.fillna(data_6.mean())
-
 data_7 = pd.read_csv('ny_la_census_perc.csv')
 data_7 = data_7.fillna(data_7.mean())
-
 data_8 = pd.read_csv('ny_dc_census_perc.csv')
 data_8 = data_8.fillna(data_8.mean())
+
+# Loading data sets for negative binomial model
+nb_nyc = pd.read_csv('negbinom_nyc.csv')
+nb_nyc = nb_nyc.fillna(nb_nyc.mean())
+nb_la = pd.read_csv('negbinom_la.csv')
+nb_la = nb_la.fillna(nb_la.mean())
+nb_dc = pd.read_csv('negbinom_dc.csv')
+nb_dc = nb_dc.fillna(nb_dc.mean())
 
 # Drop variables
 drop_X = ['GEOID', 'City', 'Borough', 'Class', 'CasualtiesPerPop', 'PedeCasualtiesCount',
           'CasualtiesPerPopDens', 'TotalInjuries', 'TotalDeaths', 'Collisions',
           'CasualtiesCount', 'pop']
 
-# Target variable
-target_y = 'CasualtiesPerPop'
-
 
 
 ############################################################ Ranking Functions
-
-### Define ranking function
+# Define ranking function
 def panos_ranking(preds, actual):
 
-    # if input data is numpy array convert to series
+    # Conditionally convert to series
     if type(preds) == np.ndarray:
         preds = pd.Series(preds)
     else:
@@ -82,123 +79,107 @@ def panos_ranking(preds, actual):
     else:
         actual = actual
 
-    # if input data is series convert input values values to a dataframe
+    # Create ranking dataframe
     preds = preds.to_frame()
     actual = actual.to_frame()
-    # concatonate the 2 values into a data frame
-    rank_df = pd.concat([preds.reset_index(drop=True), actual.reset_index(drop=True)], ignore_index=True, axis=1)
-    # rename the columns
+    rank_df = pd.concat([preds.reset_index(drop = True), actual.reset_index(drop = True)], ignore_index = True, axis = 1)
     rank_df.columns = ['preds','actual']
-    # sort the values by actual rank
-    rank_df = rank_df.sort_values(by='actual', ascending=False)
-    # rank the actuals
-    rank_df['actual_rank'] = rank_df['actual'].rank(ascending=False)
-    # rank the preds
-    rank_df['pred_rank'] = rank_df['preds'].rank(ascending=False)
-    # calculate the perfect score
+    rank_df = rank_df.sort_values(by = 'actual', ascending = False)
+    rank_df['actual_rank'] = rank_df['actual'].rank(ascending = False)
+    rank_df['pred_rank'] = rank_df['preds'].rank(ascending = False)
     rank_df['PerfectScoreTotal'] = rank_df['actual'].cumsum()
-    # copy the dataframe
     pred_df = rank_df.copy()
-    # sort the values by actual rank
-    pred_df = pred_df.sort_values(by='preds', ascending=False)
-    # drop the perfectscore column to avoid duplicate columns
-    pred_df = pred_df.drop(['PerfectScoreTotal'], axis=1)
-    # merge necessary columns together
-    final_df = pd.concat([pred_df.reset_index(drop=True),rank_df['PerfectScoreTotal'].reset_index(drop=True)],axis=1)
-    # Create PerfectScore_Remaining_Casualties
-    final_df['PerfectScore_Remaining_Casualties'] = final_df['actual'].sum()-final_df['PerfectScoreTotal']
-    # Create PerfectScore_Random
-    final_df['PerfectScore_Random'] = final_df['PerfectScore_Remaining_Casualties']/(final_df['actual'].count()-final_df['pred_rank']+1)
-    # Create Perfect_GainOverRandom
-    final_df['Perfect_GainOverRandom'] = final_df['PerfectScoreTotal'].diff()-final_df['PerfectScore_Random'].shift(1)
-    final_df['Perfect_GainOverRandom'].iloc[0] = final_df['PerfectScoreTotal'].iloc[0]-final_df['PerfectScore_Random'].iloc[0]
-    # Create Perfect_TotalGainOverRandom
+    pred_df = pred_df.sort_values(by = 'preds', ascending = False)
+    pred_df = pred_df.drop(['PerfectScoreTotal'], axis = 1)
+    final_df = pd.concat([pred_df.reset_index(drop = True), rank_df['PerfectScoreTotal'].reset_index(drop = True)], axis = 1)
+    final_df['PerfectScore_Remaining_Casualties'] = final_df['actual'].sum() - final_df['PerfectScoreTotal']
+    final_df['PerfectScore_Random'] = final_df['PerfectScore_Remaining_Casualties'] / (final_df['actual'].count() - final_df['pred_rank'] + 1)
+    final_df['Perfect_GainOverRandom'] = final_df['PerfectScoreTotal'].diff() - final_df['PerfectScore_Random'].shift(1)
+    final_df['Perfect_GainOverRandom'].iloc[0] = final_df['PerfectScoreTotal'].iloc[0] - final_df['PerfectScore_Random'].iloc[0]
     final_df['Perfect_TotalGainOverRandom'] = final_df['Perfect_GainOverRandom']
     final_df['Perfect_TotalGainOverRandom'].iloc[1:] = final_df['Perfect_TotalGainOverRandom'].cumsum()
-    # Create Total Actual
     final_df['Total_Actual'] = final_df['actual'].cumsum()
-    # Create Remaining Casualties
     final_df['Remaining Casualties'] = final_df['actual'].sum()
-    final_df['Remaining Casualties'].iloc[1:] = final_df['actual'].sum()-final_df['Total_Actual'].shift(1)
-    # Create RandomScore
-    final_df['RandomScore'] = final_df['Remaining Casualties']/(final_df['actual'].count()-final_df['pred_rank']+1)
-    # Create GainOverRandom
-    final_df['GainOverRandom'] = final_df['actual']-final_df['RandomScore']
-    # Create TotalGainOverRandom
+    final_df['Remaining Casualties'].iloc[1:] = final_df['actual'].sum() - final_df['Total_Actual'].shift(1)
+    final_df['RandomScore'] = final_df['Remaining Casualties'] / (final_df['actual'].count() - final_df['pred_rank']+1)
+    final_df['GainOverRandom'] = final_df['actual'] - final_df['RandomScore']
     final_df['TotalGainOverRandom'] = final_df['GainOverRandom']
     final_df['TotalGainOverRandom'].iloc[1:] = final_df['GainOverRandom'].cumsum()
-    # Create Gain_Over_PerfectGain
-    final_df['Gain_Over_PerfectGain'] = final_df['TotalGainOverRandom']/final_df['Perfect_TotalGainOverRandom']
-    # print the first 5 rows
+    final_df['Gain_Over_PerfectGain'] = final_df['TotalGainOverRandom'] / final_df['Perfect_TotalGainOverRandom']
     return final_df
 
 
 
-############################################################ Modeling Functions
+############################################################ Ranking Model Function
+# Define workflow function
+def run_models(city, target_y, k):
 
-### Define workflow function
-def run_models(data_i, k, n_trees, depth, max_feat):
-
-    ### Define data input
-    if data_i == 'data_1':
-        df = data_1
-        X = df.drop(drop_X, axis=1)
+    # Define data input
+    if city == 'NYCc' and target_y == 'CasualtiesCount':
+        df = data_1[data_1['pop'] >= 200]
+        X = df.drop(drop_X, axis = 1)
         y = df[target_y]
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
-    elif data_i == 'data_2':
-        df = data_2
-        X = df.drop(drop_X, axis=1)
+    elif city == 'NYCr' and target_y == 'CasualtiesCount':
+        df = data_2[data_1['pop'] >= 200]
+        X = df.drop(drop_X, axis = 1)
         y = df[target_y]
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
-    elif data_i == 'data_3':
+    elif city == 'LA' and target_y == 'CasualtiesCount':
         df = data_3
-        target_city = df['City'] == 'LA'
+        target_city = df['City'] == city
         train_city = df[-target_city]
+        train_city = train_city[train_city['pop'] >= 200]
         test_city = df[target_city]
+        test_city = test_city[test_city['pop'] >= 200]
         X_train = train_city.drop(drop_X, axis=1)
         X_test = test_city.drop(drop_X, axis=1)
         y_train = train_city[target_y]
         y_test = test_city[target_y]
-    elif data_i == 'data_4':
+    elif city == 'DC' and target_y == 'CasualtiesCount':
         df = data_4
-        target_city = df['City'] == 'DC'
+        target_city = df['City'] == city
         train_city = df[-target_city]
+        train_city = train_city[train_city['pop'] >= 200]
         test_city = df[target_city]
         X_train = train_city.drop(drop_X, axis=1)
         X_test = test_city.drop(drop_X, axis=1)
         y_train = train_city[target_y]
         y_test = test_city[target_y]
-    elif data_i == 'data_5':
-        df = data_5
+    elif city == 'NYCc' and target_y == 'CasualtiesPerPop':
+        df = data_5[data_1['pop'] >= 200]
         X = df.drop(drop_X, axis=1)
         y = df[target_y]
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
-    elif data_i == 'data_6':
-        df = data_6
+    elif city == 'NYCr' and target_y == 'CasualtiesPerPop':
+        df = data_6[data_1['pop'] >= 200]
         X = df.drop(drop_X, axis=1)
         y = df[target_y]
         strat = df[['Borough', 'Class']].values
         X_train, X_test, y_train, y_test = train_test_split(
                 X, y, stratify = strat, test_size = 0.30, random_state = 1234)
-    elif data_i == 'data_7':
+    elif city == 'LA' and target_y == 'CasualtiesPerPop':
         df = data_7
-        target_city = df['City'] == 'LA'
+        target_city = df['City'] == city
         train_city = df[-target_city]
+        train_city = train_city[train_city['pop'] >= 200]
         test_city = df[target_city]
+        test_city = test_city[test_city['pop'] >= 200]
         X_train = train_city.drop(drop_X, axis=1)
         X_test = test_city.drop(drop_X, axis=1)
         y_train = train_city[target_y]
         y_test = test_city[target_y]
-    elif data_i == 'data_8':
+    elif city == 'DC' and target_y == 'CasualtiesPerPop':
         df = data_8
-        target_city = df['City'] == 'DC'
+        target_city = df['City'] == city
         train_city = df[-target_city]
+        train_city = train_city[train_city['pop'] >= 200]
         test_city = df[target_city]
         X_train = train_city.drop(drop_X, axis=1)
         X_test = test_city.drop(drop_X, axis=1)
@@ -236,9 +217,9 @@ def run_models(data_i, k, n_trees, depth, max_feat):
 
     ### Train, validate, and test random forest model
     rf = RandomForestRegressor(
-        n_estimators = n_trees,
-        max_depth = depth,
-        max_features = max_feat
+        n_estimators = 500,
+        max_depth = 5,
+        max_features = 0.5
     )
     rf_cv = - cross_val_score(
             rf,
@@ -255,11 +236,11 @@ def run_models(data_i, k, n_trees, depth, max_feat):
 
     ### Train and test xgboost model
     xgb = xgboost.XGBRegressor(
-        n_estimators = n_trees,
+        n_estimators = 500,
         learning_rate = 0.08,
         gamma = 0,
-        colsample_bytree = max_feat,
-        max_depth = depth
+        colsample_bytree = 0.5,
+        max_depth = 5
     )
     kfold = KFold(n_splits = k)
     xgb_cv = - cross_val_score(
@@ -278,47 +259,47 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     # Print iteration titles
     print(" ")
     print("======================================================================")
-    if data_i == 'data_1':
+    if city == 'NYCc' and target_y == 'CasualtiesCount':
         print("ITERATION:")
         print("Train & Test on NYC with Census Features")
         print("Target Variable:", target_y)
         print(" ")
-    elif data_i == 'data_2':
+    elif city == 'NYCr' and target_y == 'CasualtiesCount':
         print("ITERATION:")
         print("Train & Test on NYC with Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
-    elif data_i == 'data_3':
+    elif city == 'LA' and target_y == 'CasualtiesCount':
         print("ITERATION:")
         print("Train on NYC & Test on LA with Census Features")
         print("Target Variable:", target_y)
         print(" ")
-    elif data_i == 'data_4':
+    elif city == 'DC' and target_y == 'CasualtiesCount':
         print("ITERATION:")
         print("Train on NYC & Test on DC with Census Features")
         print("Target Variable:", target_y)
         print(" ")
-    elif data_i == 'data_5':
+    elif city == 'NYCc' and target_y == 'CasualtiesPerPop':
         print("ITERATION:")
         print("Train & Test on NYC with Proportioned Census Features")
         print("Target Variable:", target_y)
         print(" ")
-    elif data_i == 'data_6':
+    elif city == 'NYCr' and target_y == 'CasualtiesPerPop':
         print("ITERATION:")
         print("Train & Test on NYC with Proportioned Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
-    elif data_i == 'data_7':
+    elif city == 'LA' and target_y == 'CasualtiesPerPop':
         print("ITERATION:")
         print("Train on NYC & Test on LA with Proportioned Census")
         print("Target Variable:", target_y)
         print(" ")
-    elif data_i == 'data_8':
+    elif city == 'DC' and target_y == 'CasualtiesPerPop':
         print("ITERATION:")
         print("Train on NYC & Test on DC with Proportioned Census & Road Features")
         print("Target Variable:", target_y)
         print(" ")
-    
+
     # Print model scores
     print("======================================================================")
     print("MODEL PERFORMANCE")
@@ -326,7 +307,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     print("TARGET BASELINE")
     print("  Test Set Stdev: {:.2f}".format(np.std(y_test)))
     print("  Test Set MAE: {:.2f}".format(abs(y_test - np.mean(y_test)).mean()))
-    print(" ")  
+    print(" ")
     results_dict = {
             'Model' : ['Negative Binomial', 'K-Nearest Neighbors', 'Random Forest', 'XGBoost'],
             'CV RMSE' : ['n/a', np.sqrt(knn_cv), np.sqrt(rf_cv), np.sqrt(xgb_cv)],
@@ -335,7 +316,7 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             }
     results_df = pd.DataFrame.from_dict(results_dict)
     print(results_df)
-    print(" ")  
+    print(" ")
 
     # Print variable importance from Random Forest & XGBoost
     print("======================================================================")
@@ -345,12 +326,12 @@ def run_models(data_i, k, n_trees, depth, max_feat):
             data = rf.feature_importances_,
             index = X_train.columns
             )
-    importances_sorted = importances.sort_values()[-9:]
+    importances_sorted = importances.sort_values()[-10:]
     importances_sorted.plot(kind = 'barh', color = 'lightblue', figsize = (5, 3))
     plt.ylabel('Features')
     plt.title('Random Forest Top 10 Features')
     plt.show()
-    
+
     # XGBoost Feature Importance Chart
     fig, ax = plt.subplots(figsize = (5, 3))
     plot_importance(
@@ -393,97 +374,148 @@ def run_models(data_i, k, n_trees, depth, max_feat):
     plt.xlabel('Predicted Rank Position')
     plt.ylabel('Cumulative Gain Score')
     plt.legend()
-    if data_i == 'data_1':
+    if city == 'NYCc' and target_y == 'CasualtiesCount':
         plt.title('Train & Test on NYC with Census Features')
-    elif data_i == 'data_2':
+    elif city == 'NYCr' and target_y == 'CasualtiesCount':
         plt.title('Train & Test on NYC with Census & Road Features')
-    elif data_i == 'data_3':
+    elif city == 'LA' and target_y == 'CasualtiesCount':
         plt.title('Train on NYC & Test on LA with Census Features')
-    elif data_i == 'data_4':
+    elif city == 'DC' and target_y == 'CasualtiesCount':
         plt.title('Train on NYC & Test on DC with Census Features')
-    elif data_i == 'data_5':
+    elif city == 'NYCc' and target_y == 'CasualtiesPerPop':
         plt.title('Train & Test on NYC with Proportioned Census Features')
-    elif data_i == 'data_6':
+    elif city == 'NYCr' and target_y == 'CasualtiesPerPop':
         plt.title('Train & Test on NYC with Proportioned Census & Road Features')
-    elif data_i == 'data_7':
+    elif city == 'LA' and target_y == 'CasualtiesPerPop':
         plt.title('Train on NYC & Test on LA with Proportioned Census')
-    elif data_i == 'data_8':
+    elif city == 'DC' and target_y == 'CasualtiesPerPop':
         plt.title('Train on NYC & Test on DC with Proportioned Census')
     plt.figure(figsize = (5, 4))
     plt.show()
 
 
 
-############################################################ Run Modeling & Anlayze Results
+############################################################ Negative Binomial Model Function
+# Define negative binomial model function that produces summary for analysis
+def run_negbinom(area, target_y, features):
 
-# Train NYC Test NYC with Census Only
-run_models(
-        data_i = 'data_1',
-        k = 5,
-        n_trees = 500,
-        depth = 5,
-        max_feat = 0.50
-        )
+    # Define features to include
+    if features == 'transpo':
+        keep = ['pop_dens', 'trav_cars', 'trav_trans', 'trav_motorcycle', 'trav_bike',
+                'trav_walk', 'trav_home']
+    elif features == 'demog':
+        keep = ['pop_dens', 'race_white', 'race_minority', 'female', 'age_genz',
+                'age_millenial', 'age_genx', 'age_boomer', 'age_retiree', 'divsep',
+                'widowed', 'median_age', 'not_us_citizen', 'median_earnings',
+                'edu_lowedu', 'edu_hsged', 'edu_bs', 'edu_grad', 'unemp', 'below_pov']
+    elif features == 'road':
+        keep = ['road_maxspeed', 'road_meanspeed', 'road_maxlength', 'road_minlength',
+                'road_meanlength', 'road_totlanes', 'road_maxlanes', 'road_iri', 'road_bumps',
+                'road_aadt', 'road_sumlength', 'road_pci', 'road_pavewidth', 'road_vc', 'road_q']
+    elif features == 'census':
+        keep = ['pop_dens', 'race_white', 'race_minority', 'female', 'age_genz',
+                'age_millenial', 'age_genx', 'age_boomer', 'age_retiree', 'divsep',
+                'widowed', 'median_age', 'not_us_citizen', 'median_earnings', 'trav_cars',
+                'trav_trans', 'trav_motorcycle', 'trav_bike', 'trav_walk', 'trav_home',
+                'edu_lowedu', 'edu_hsged', 'edu_bs', 'edu_grad', 'unemp', 'below_pov']
+    elif features == 'hypoth':
+        keep = ['pop_dens', 'median_age', 'median_earnings', 'trav_cars', 'trav_trans',
+                'trav_bike', 'trav_walk', 'below_pov', 'race_minority']
+    elif features == 'custom':
+        keep = [custom]
 
-# Train NYC Test NYC with Census & Road Condition Data
-run_models(
-        data_i = 'data_2',
-        k = 5,
-        n_trees = 500,
-        depth = 5,
-        max_feat = 0.50
-        )
+    # Define city input
+    if area == 'NYC':
+        df = nb_nyc[nb_nyc['pop'] >= 200]
+    elif area == 'Bronx':
+        df = nb_nyc[nb_nyc['Borough'] == 'Bronx']
+        df = df[df['pop'] >= 200]
+    elif area == 'Brooklyn':
+        df = nb_nyc[nb_nyc['Borough'] == 'Brooklyn']
+        df = df[df['pop'] >= 200]
+    elif area == 'Manhattan':
+        df = nb_nyc[nb_nyc['Borough'] == 'Manhattan']
+        df = df[df['pop'] >= 200]
+    elif area == 'Queens':
+        df = nb_nyc[nb_nyc['Borough'] == 'Queens']
+        df = df[df['pop'] >= 200]
+    elif area == 'Staten Island':
+        df = nb_nyc[nb_nyc['Borough'] == 'Staten Island']
+        df = df[df['pop'] >= 200]
+    elif area == 'LA':
+        df = nb_la
+        df = nb_la[nb_la['pop'] >= 200]
+    elif area == 'DC':
+        df = nb_dc
 
-# Train NYC Test LA with Census Only
-run_models(
-        data_i = 'data_3',
-        k = 5,
-        n_trees = 500,
-        depth = 5,
-        max_feat = 0.50
-        )
+    # Define data input
+    if (target_y == 'CasualtiesCount' or target_y == 'PedeCasualtiesCount' or
+        target_y == 'CyclCasualtiesCount' or  target_y == 'MotrCasualtiesCount'):
+        df = df[df['Type'] == 'Count']
+        X = df[keep]
+        y = df[target_y]
+    elif (target_y == 'CasualtiesPerPop' or target_y == 'PedeCasualtiesPerPop' or
+          target_y == 'CyclCasualtiesPerPop' or target_y == 'MotrCasualtiesPerPop'):
+        df = df[df['Type'] == 'Percentage']
+        X = df[keep]
+        y = df[target_y]
+    elif target_y == 'Collisions':
+        df = df[df['Type'] == 'Count']
+        X = df[keep]
+        y = df[target_y]
 
-# Train NYC Test DC with Census Only
-run_models(
-        data_i = 'data_4',
-        k = 5,
-        n_trees = 50,
-        depth = 5,
-        max_feat = 0.50
-        )
+    ### Train and test negative binomial model
+    Xa = sm.add_constant(X)
+    negbinom = sm.GLM(y, Xa, family = sm.families.NegativeBinomial()).fit()
+    negbinom_pred = negbinom.predict(Xa)
+    negbinom_ranking = panos_ranking(negbinom_pred, y)
 
-# Train & Test on NYC with Proportioned Census Features
-run_models(
-        data_i = 'data_5',
-        k = 5,
-        n_trees = 50,
-        depth = 5,
-        max_feat = 0.50
-        )
+    ### Print all outputs
+    print("==============================================================================")
+    print("AIC:", NegativeBinomialResults.aic(negbinom))
+    print("==============================================================================")
+    print(negbinom.summary())
+    print("RANKING PERFORMANCE")
+    plt.plot(
+        negbinom_ranking['pred_rank'],
+        negbinom_ranking['Perfect_TotalGainOverRandom'],
+        color ='blue',
+        label = 'Perfect Ranking')
+    plt.plot(
+        negbinom_ranking['pred_rank'],
+        negbinom_ranking['TotalGainOverRandom'],
+        color ='red',
+        label = 'Neg Binom Ranking')
+    plt.xlabel('Predicted Rank Position')
+    plt.ylabel('Cumulative Gain Score')
+    plt.legend()
+    plt.figure(figsize = (5, 4))
+    plt.show()
 
-# Train NYC Test NYC with Proportioned Census & Road Condition Data
-run_models(
-        data_i = 'data_6',
-        k = 5,
-        n_trees = 500,
-        depth = 5,
-        max_feat = 0.50
-        )
 
-# Train NYC Test LA with Proportioned Census Only
-run_models(
-        data_i = 'data_7',
-        k = 5,
-        n_trees = 500,
-        depth = 5,
-        max_feat = 0.50
-        )
 
-# Train NYC Test DC with Proportioned Census Only
+############################################################ Run Models
+# run_models() instructions:
+# city: select 'NYCc' (census only), 'NYCr' (census & road features), 'LA', or 'DC'
+# target_y: select 'CasualtiesCount' or 'CasualtiesPerPop'
+# k: select number of folds for cross validation
+
+# Run model workflow function
 run_models(
-        data_i = 'data_8',
-        k = 5,
-        n_trees = 50,
-        depth = 5,
-        max_feat = 0.50
-        )
+    city = 'NYCc',
+    target_y = 'CasualtiesPerPop',
+    k = 5
+)
+
+
+# run_negbinom() instructions:
+# city: select 'NYC', 'Brooklyn', 'Bronx', 'Queens', 'Manhattan', 'Staten Island', 'LA', or 'DC'
+# target_y: select 'CasualtiesCount', 'CasualtiesPerPop'
+# features: select 'transpo', 'demog', 'census', or 'hypoth'
+
+# Run negative binomial model function
+run_negbinom(
+    area = 'NYC',
+    target_y = 'CasualtiesPerPop',
+    features = 'hypoth'
+)
