@@ -1,4 +1,4 @@
-# Predicitve Analytics for Traffic Safety
+# Predictive Analytics for Traffic Safety
 ### NYU Stern MSBA 2019 Capstone Project
 **Team Knight Rider**
 * Noah Branham
